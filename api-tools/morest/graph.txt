@@ -1,0 +1,25 @@
+digraph {
+	"PUT /groups/{id}/hooks/{hook_id}"
+	"POST /groups/{id}/hooks"
+	"GET /groups"
+	"PUT /groups/{id}"
+	"POST /groups/{id}/share"
+	"GET /groups/{id}/hooks"
+	"DELETE /groups/{id}"
+	"DELETE /groups/{id}/share/{group_id}"
+	"GET /groups/{id}/hooks/{hook_id}"
+	"GET /groups/{id}/projects"
+	"POST /groups/{id}/projects/{project_id}"
+	"GET /groups/{id}/descendant_groups"
+	"POST /groups"
+	"DELETE /groups/{id}/hooks/{hook_id}"
+	"GET /groups/{id}"
+	"GET /groups/{id}/subgroups"
+	"GET /groups/{id}/projects/shared"
+	"GET /groups" -> "POST /groups" [label=CRUD]
+	"DELETE /groups/{id}/hooks/{hook_id}" -> "PUT /groups/{id}/hooks/{hook_id}" [label=CRUD]
+	"DELETE /groups/{id}" -> "PUT /groups/{id}" [label=CRUD]
+	"PUT /groups/{id}/hooks/{hook_id}" -> "GET /groups/{id}/hooks/{hook_id}" [label=CRUD]
+	"GET /groups/{id}/hooks" -> "POST /groups/{id}/hooks" [label=CRUD]
+	"PUT /groups/{id}" -> "GET /groups/{id}" [label=CRUD]
+}

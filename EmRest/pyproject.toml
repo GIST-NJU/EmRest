@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "EmRest"
+version = "1.0.0"
+description = "Effective REST APIs Testing with Error Message Analysis"
+authors = ["Lixin <lxxu@smail.nju.edu.cn>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^2.2.2"
+openapi3-parser = "^1.1.17"
+spacy = "^3.7.5"
+wordninja = "^2.0.0"
+regex = "^2024.5.15"
+rstr = "^3.2.2"
+fuzzywuzzy = "^0.18.0"
+numpy = "1.26.4"
+python-levenshtein = "^0.27.1"
+
+
+[tool.poetry.group.dev.dependencies]
+deptry = "^0.23.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

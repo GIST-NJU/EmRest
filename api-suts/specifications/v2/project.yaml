@@ -1,0 +1,1999 @@
+basePath: /
+definitions:
+  Assignment:
+    properties:
+      commitDate:
+        example: dd-MM-yyyyHH:mm:ss
+        type: string
+      commitEmpDesc:
+        type: string
+      commitMgrDesc:
+        type: string
+      employee:
+        $ref: '#/definitions/Employee'
+      employeeId:
+        format: int32
+        type: integer
+      project:
+        $ref: '#/definitions/Project'
+      projectId:
+        format: int32
+        type: integer
+    title: Assignment
+    type: object
+  AuthenticationRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    title: AuthenticationRequest
+    type: object
+  AuthenticationResponse:
+    properties:
+      isEligible:
+        type: boolean
+      username:
+        type: string
+    title: AuthenticationResponse
+    type: object
+  Credential:
+    properties:
+      credentialId:
+        format: int32
+        type: integer
+      enabled:
+        type: boolean
+      password:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    title: Credential
+    type: object
+  Department:
+    properties:
+      departmentId:
+        format: int32
+        type: integer
+      departmentName:
+        type: string
+      location:
+        $ref: '#/definitions/Location'
+    title: Department
+    type: object
+  DtoCollectionAssignment:
+    properties:
+      collection:
+        items:
+          $ref: '#/definitions/Assignment'
+        type: array
+    title: DtoCollectionAssignment
+    type: object
+  DtoCollectionCredential:
+    properties:
+      collection:
+        items:
+          $ref: '#/definitions/Credential'
+        type: array
+    title: DtoCollectionCredential
+    type: object
+  DtoCollectionDepartment:
+    properties:
+      collection:
+        items:
+          $ref: '#/definitions/Department'
+        type: array
+    title: DtoCollectionDepartment
+    type: object
+  DtoCollectionEmployee:
+    properties:
+      collection:
+        items:
+          $ref: '#/definitions/Employee'
+        type: array
+    title: DtoCollectionEmployee
+    type: object
+  DtoCollectionEmployeeProjectData:
+    properties:
+      collection:
+        items:
+          $ref: '#/definitions/EmployeeProjectData'
+        type: array
+    title: DtoCollectionEmployeeProjectData
+    type: object
+  DtoCollectionLocation:
+    properties:
+      collection:
+        items:
+          $ref: '#/definitions/Location'
+        type: array
+    title: DtoCollectionLocation
+    type: object
+  DtoCollectionManagerProjectData:
+    properties:
+      collection:
+        items:
+          $ref: '#/definitions/ManagerProjectData'
+        type: array
+    title: DtoCollectionManagerProjectData
+    type: object
+  DtoCollectionProject:
+    properties:
+      collection:
+        items:
+          $ref: '#/definitions/Project'
+        type: array
+    title: DtoCollectionProject
+    type: object
+  DtoCollectionProjectCommit:
+    properties:
+      collection:
+        items:
+          $ref: '#/definitions/ProjectCommit'
+        type: array
+    title: DtoCollectionProjectCommit
+    type: object
+  Employee:
+    properties:
+      credential:
+        $ref: '#/definitions/Credential'
+      department:
+        $ref: '#/definitions/Department'
+      email:
+        type: string
+      employeeId:
+        format: int32
+        type: integer
+      firstName:
+        type: string
+      hiredate:
+        example: dd-MM-yyyy
+        type: string
+      job:
+        type: string
+      lastName:
+        type: string
+      phone:
+        type: string
+      salary:
+        format: double
+        type: number
+    title: Employee
+    type: object
+  EmployeeProjectData:
+    properties:
+      endDate:
+        type: string
+      projectId:
+        format: int32
+        type: integer
+      startDate:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    title: EmployeeProjectData
+    type: object
+  Location:
+    properties:
+      adr:
+        type: string
+      city:
+        type: string
+      locationId:
+        format: int32
+        type: integer
+      postalCode:
+        type: string
+    title: Location
+    type: object
+  ManagerProjectData:
+    properties:
+      endDate:
+        type: string
+      projectId:
+        format: int32
+        type: integer
+      startDate:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    title: ManagerProjectData
+    type: object
+  Project:
+    properties:
+      endDate:
+        example: dd-MM-yyyy
+        type: string
+      projectId:
+        format: int32
+        type: integer
+      startDate:
+        example: dd-MM-yyyy
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    title: Project
+    type: object
+  ProjectCommit:
+    properties:
+      commitDate:
+        format: date-time
+        type: string
+      commitEmpDesc:
+        type: string
+      commitMgrDesc:
+        type: string
+      employeeId:
+        format: int32
+        type: integer
+      firstName:
+        type: string
+      lastName:
+        type: string
+      projectId:
+        format: int32
+        type: integer
+    title: ProjectCommit
+    type: object
+host: localhost:47001
+info:
+  contact:
+    email: springabcxyz@gmail.com
+    name: Selim Horri, Imen Touk, Badr Idoudi
+    url: https://github.com/SelimHorri/Project-Tracking-System
+  description: "Manage and track commits transactions by Employees and their Managers\
+    \ on a specific project.\n- Employees can be assigned to projects created and\
+    \ managed by their managers, can add a new commits to a specific project so manager\
+    \ can track its progression\n- Managers can create, edit & delete projects, also\
+    \ assign them to their employees and track them efficiently & easily\n- Admin\
+    \ manages all Employees as well as their credentials & departments\nFor more,\
+    \ you can check more on our GitHub repositories : \n- Selim Horri : https://github.com/SelimHorri?tab=repositories\
+    \ \n- Imen Toukebri : https://github.com/imen1012?tab=repositories \n- Bader Idoudi\
+    \ : https://github.com/Bader1996?tab=repositories \n"
+  license:
+    name: Apache Licence version 2.0
+    url: https://apache.org/license.html
+  termsOfService: Terms of service
+  title: Project-Tracker-System
+  version: '1.0'
+paths:
+  /app/api/assignments:
+    get:
+      deprecated: false
+      operationId: findAllUsingGET
+      parameters: []
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DtoCollectionAssignment'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findAll
+      tags:
+      - assignment-resource
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: saveUsingPOST
+      parameters:
+      - description: assignment
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Assignment'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Assignment'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: save
+      tags:
+      - assignment-resource
+      x-codegen-request-body-name: assignment
+    put:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: updateUsingPUT
+      parameters:
+      - description: assignment
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Assignment'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Assignment'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: update
+      tags:
+      - assignment-resource
+      x-codegen-request-body-name: assignment
+  /app/api/assignments/data/project-commit/{employeeId}/{projectId}:
+    get:
+      deprecated: false
+      operationId: findByEmployeeIdAndProjectIdUsingGET
+      parameters:
+      - description: employeeId
+        in: path
+        name: employeeId
+        required: true
+        type: string
+        x-example: abc
+      - description: projectId
+        in: path
+        name: projectId
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DtoCollectionProjectCommit'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findByEmployeeIdAndProjectId
+      tags:
+      - assignment-resource
+  /app/api/assignments/data/project-commit/{employeeId}/{projectId}/{commitDate}:
+    get:
+      deprecated: false
+      operationId: findByEmployeeIdAndProjectIdAndCommitDateUsingGET
+      parameters:
+      - description: commitDate
+        in: path
+        name: commitDate
+        required: true
+        type: string
+        x-example: abc
+      - description: employeeId
+        in: path
+        name: employeeId
+        required: true
+        type: string
+        x-example: abc
+      - description: projectId
+        in: path
+        name: projectId
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ProjectCommit'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findByEmployeeIdAndProjectIdAndCommitDate
+      tags:
+      - assignment-resource
+  /app/api/assignments/data/project-commit/{projectId}:
+    get:
+      deprecated: false
+      operationId: findByProjectIdUsingGET
+      parameters:
+      - description: projectId
+        in: path
+        name: projectId
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DtoCollectionProjectCommit'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findByProjectId
+      tags:
+      - assignment-resource
+  /app/api/assignments/delete/{employeeId}/{projectId}/{commitDate}:
+    delete:
+      deprecated: false
+      operationId: deleteByIdUsingDELETE
+      parameters:
+      - description: commitDate
+        in: path
+        name: commitDate
+        required: true
+        type: string
+        x-example: abc
+      - description: employeeId
+        in: path
+        name: employeeId
+        required: true
+        type: string
+        x-example: abc
+      - description: projectId
+        in: path
+        name: projectId
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteById
+      tags:
+      - assignment-resource
+  /app/api/assignments/save:
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: saveUsingPOST_1
+      parameters:
+      - description: assignment
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Assignment'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Assignment'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: save
+      tags:
+      - assignment-resource
+      x-codegen-request-body-name: assignment
+  /app/api/assignments/update:
+    put:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: updateUsingPUT_1
+      parameters:
+      - description: assignment
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Assignment'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Assignment'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: update
+      tags:
+      - assignment-resource
+      x-codegen-request-body-name: assignment
+  /app/api/assignments/{employeeId}/{projectId}:
+    get:
+      deprecated: false
+      operationId: findAllByEmployeeIdAndManagerIdUsingGET
+      parameters:
+      - description: employeeId
+        in: path
+        name: employeeId
+        required: true
+        type: string
+        x-example: abc
+      - description: projectId
+        in: path
+        name: projectId
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DtoCollectionAssignment'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findAllByEmployeeIdAndManagerId
+      tags:
+      - assignment-resource
+  /app/api/assignments/{employeeId}/{projectId}/{commitDate}:
+    delete:
+      deprecated: false
+      operationId: deleteByIdUsingDELETE_1
+      parameters:
+      - description: commitDate
+        in: path
+        name: commitDate
+        required: true
+        type: string
+        x-example: abc
+      - description: employeeId
+        in: path
+        name: employeeId
+        required: true
+        type: string
+        x-example: abc
+      - description: projectId
+        in: path
+        name: projectId
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteById
+      tags:
+      - assignment-resource
+    get:
+      deprecated: false
+      operationId: findByIdUsingGET
+      parameters:
+      - description: commitDate
+        in: path
+        name: commitDate
+        required: true
+        type: string
+        x-example: abc
+      - description: employeeId
+        in: path
+        name: employeeId
+        required: true
+        type: string
+        x-example: abc
+      - description: projectId
+        in: path
+        name: projectId
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Assignment'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findById
+      tags:
+      - assignment-resource
+  /app/api/authenticate:
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: authenticateUsingPOST
+      parameters:
+      - description: authenticationRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/AuthenticationRequest'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/AuthenticationResponse'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: authenticate
+      tags:
+      - authentication-resource
+      x-codegen-request-body-name: authenticationRequest
+  /app/api/credentials:
+    delete:
+      deprecated: false
+      operationId: deleteByIdUsingDELETE_2
+      parameters:
+      - description: credentialId
+        in: query
+        name: credentialId
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: boolean
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteById
+      tags:
+      - credential-resource
+    get:
+      deprecated: false
+      operationId: findAllUsingGET_2
+      parameters: []
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DtoCollectionCredential'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findAll
+      tags:
+      - credential-resource
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: saveUsingPOST_2
+      parameters:
+      - description: credential
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Credential'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Credential'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: save
+      tags:
+      - credential-resource
+      x-codegen-request-body-name: credential
+    put:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: updateUsingPUT_2
+      parameters:
+      - description: credential
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Credential'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Credential'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: update
+      tags:
+      - credential-resource
+      x-codegen-request-body-name: credential
+  /app/api/credentials/delete:
+    delete:
+      deprecated: false
+      operationId: deleteByIdUsingDELETE_3
+      parameters:
+      - description: credentialId
+        in: query
+        name: credentialId
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: boolean
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteById
+      tags:
+      - credential-resource
+  /app/api/credentials/save:
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: saveUsingPOST_3
+      parameters:
+      - description: credential
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Credential'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Credential'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: save
+      tags:
+      - credential-resource
+      x-codegen-request-body-name: credential
+  /app/api/credentials/update:
+    put:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: updateUsingPUT_3
+      parameters:
+      - description: credential
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Credential'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Credential'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: update
+      tags:
+      - credential-resource
+      x-codegen-request-body-name: credential
+  /app/api/credentials/username/{username}:
+    delete:
+      deprecated: false
+      operationId: deleteByUsernameUsingDELETE
+      parameters:
+      - description: username
+        in: path
+        name: username
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: boolean
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteByUsername
+      tags:
+      - credential-resource
+    get:
+      deprecated: false
+      operationId: findByUsernameUsingGET
+      parameters:
+      - description: username
+        in: path
+        name: username
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Credential'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findByUsername
+      tags:
+      - credential-resource
+  /app/api/credentials/{id}:
+    get:
+      deprecated: false
+      operationId: findByIdUsingGET_1
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Credential'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findById
+      tags:
+      - credential-resource
+  /app/api/departments:
+    delete:
+      deprecated: false
+      operationId: deleteByIdUsingDELETE_4
+      parameters:
+      - description: departmentId
+        in: query
+        name: departmentId
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: boolean
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteById
+      tags:
+      - department-resource
+    get:
+      deprecated: false
+      operationId: findAllUsingGET_4
+      parameters: []
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DtoCollectionDepartment'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findAll
+      tags:
+      - department-resource
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: saveUsingPOST_4
+      parameters:
+      - description: department
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Department'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Department'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: save
+      tags:
+      - department-resource
+      x-codegen-request-body-name: department
+    put:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: updateUsingPUT_4
+      parameters:
+      - description: department
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Department'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Department'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: update
+      tags:
+      - department-resource
+      x-codegen-request-body-name: department
+  /app/api/departments/delete:
+    delete:
+      deprecated: false
+      operationId: deleteByIdUsingDELETE_5
+      parameters:
+      - description: departmentId
+        in: query
+        name: departmentId
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: boolean
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteById
+      tags:
+      - department-resource
+  /app/api/departments/save:
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: saveUsingPOST_5
+      parameters:
+      - description: department
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Department'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Department'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: save
+      tags:
+      - department-resource
+      x-codegen-request-body-name: department
+  /app/api/departments/update:
+    put:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: updateUsingPUT_5
+      parameters:
+      - description: department
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Department'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Department'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: update
+      tags:
+      - department-resource
+      x-codegen-request-body-name: department
+  /app/api/departments/{id}:
+    get:
+      deprecated: false
+      operationId: findByIdUsingGET_2
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Department'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findById
+      tags:
+      - department-resource
+  /app/api/employees:
+    delete:
+      deprecated: false
+      operationId: deleteByIdUsingDELETE_6
+      parameters:
+      - description: employeeId
+        in: query
+        name: employeeId
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: boolean
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteById
+      tags:
+      - employee-resource
+    get:
+      deprecated: false
+      operationId: findAllUsingGET_6
+      parameters: []
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DtoCollectionEmployee'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findAll
+      tags:
+      - employee-resource
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: saveUsingPOST_6
+      parameters:
+      - description: employee
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Employee'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Employee'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: save
+      tags:
+      - employee-resource
+      x-codegen-request-body-name: employee
+    put:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: updateUsingPUT_6
+      parameters:
+      - description: employee
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Employee'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Employee'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: update
+      tags:
+      - employee-resource
+      x-codegen-request-body-name: employee
+  /app/api/employees/data/department/{departmentId}:
+    get:
+      deprecated: false
+      operationId: findByDepartmentIdUsingGET
+      parameters:
+      - description: departmentId
+        in: path
+        name: departmentId
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DtoCollectionEmployee'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findByDepartmentId
+      tags:
+      - employee-resource
+  /app/api/employees/data/employee-project-data/{employeeId}:
+    get:
+      deprecated: false
+      operationId: findByEmployeeProjectDataEmployeeIdUsingGET
+      parameters:
+      - description: employeeId
+        in: path
+        name: employeeId
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DtoCollectionEmployeeProjectData'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findByEmployeeProjectDataEmployeeId
+      tags:
+      - employee-resource
+  /app/api/employees/data/manager-project-data/{employeeId}:
+    get:
+      deprecated: false
+      operationId: findManagerProjectDataByEmployeeIdUsingGET
+      parameters:
+      - description: employeeId
+        in: path
+        name: employeeId
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DtoCollectionManagerProjectData'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findManagerProjectDataByEmployeeId
+      tags:
+      - employee-resource
+  /app/api/employees/delete:
+    delete:
+      deprecated: false
+      operationId: deleteByIdUsingDELETE_7
+      parameters:
+      - description: employeeId
+        in: query
+        name: employeeId
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: boolean
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteById
+      tags:
+      - employee-resource
+  /app/api/employees/save:
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: saveUsingPOST_7
+      parameters:
+      - description: employee
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Employee'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Employee'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: save
+      tags:
+      - employee-resource
+      x-codegen-request-body-name: employee
+  /app/api/employees/update:
+    put:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: updateUsingPUT_7
+      parameters:
+      - description: employee
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Employee'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Employee'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: update
+      tags:
+      - employee-resource
+      x-codegen-request-body-name: employee
+  /app/api/employees/username/{username}:
+    delete:
+      deprecated: false
+      operationId: deleteByUsernameUsingDELETE_1
+      parameters:
+      - description: username
+        in: path
+        name: username
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: boolean
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteByUsername
+      tags:
+      - employee-resource
+    get:
+      deprecated: false
+      operationId: findByUsernameUsingGET_1
+      parameters:
+      - description: username
+        in: path
+        name: username
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Employee'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findByUsername
+      tags:
+      - employee-resource
+  /app/api/employees/{id}:
+    get:
+      deprecated: false
+      operationId: findByIdUsingGET_3
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Employee'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findById
+      tags:
+      - employee-resource
+  /app/api/locations:
+    delete:
+      deprecated: false
+      operationId: deleteByIdUsingDELETE_8
+      parameters:
+      - description: locationId
+        in: query
+        name: locationId
+        type: string
+      responses:
+        '200':
+          description: OK
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteById
+      tags:
+      - location-resource
+    get:
+      deprecated: false
+      operationId: findAllUsingGET_8
+      parameters: []
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DtoCollectionLocation'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findAll
+      tags:
+      - location-resource
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: saveUsingPOST_8
+      parameters:
+      - description: location
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Location'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Location'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: save
+      tags:
+      - location-resource
+      x-codegen-request-body-name: location
+    put:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: updateUsingPUT_8
+      parameters:
+      - description: location
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Location'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Location'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: update
+      tags:
+      - location-resource
+      x-codegen-request-body-name: location
+  /app/api/locations/delete:
+    delete:
+      deprecated: false
+      operationId: deleteByIdUsingDELETE_9
+      parameters:
+      - description: locationId
+        in: query
+        name: locationId
+        type: string
+      responses:
+        '200':
+          description: OK
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteById
+      tags:
+      - location-resource
+  /app/api/locations/save:
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: saveUsingPOST_9
+      parameters:
+      - description: location
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Location'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Location'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: save
+      tags:
+      - location-resource
+      x-codegen-request-body-name: location
+  /app/api/locations/update:
+    put:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: updateUsingPUT_9
+      parameters:
+      - description: location
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Location'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Location'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: update
+      tags:
+      - location-resource
+      x-codegen-request-body-name: location
+  /app/api/locations/{id}:
+    get:
+      deprecated: false
+      operationId: findByIdUsingGET_4
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Location'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findById
+      tags:
+      - location-resource
+  /app/api/projects:
+    delete:
+      deprecated: false
+      operationId: deleteByIdUsingDELETE_10
+      parameters:
+      - description: projectId
+        in: query
+        name: projectId
+        type: string
+      responses:
+        '200':
+          description: OK
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteById
+      tags:
+      - project-resource
+    get:
+      deprecated: false
+      operationId: findAllUsingGET_10
+      parameters: []
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DtoCollectionProject'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findAll
+      tags:
+      - project-resource
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: saveUsingPOST_10
+      parameters:
+      - description: project
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Project'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Project'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: save
+      tags:
+      - project-resource
+      x-codegen-request-body-name: project
+    put:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: updateUsingPUT_10
+      parameters:
+      - description: project
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Project'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Project'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: update
+      tags:
+      - project-resource
+      x-codegen-request-body-name: project
+  /app/api/projects/delete:
+    delete:
+      deprecated: false
+      operationId: deleteByIdUsingDELETE_11
+      parameters:
+      - description: projectId
+        in: query
+        name: projectId
+        type: string
+      responses:
+        '200':
+          description: OK
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: deleteById
+      tags:
+      - project-resource
+  /app/api/projects/save:
+    post:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: saveUsingPOST_11
+      parameters:
+      - description: project
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Project'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Project'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: save
+      tags:
+      - project-resource
+      x-codegen-request-body-name: project
+  /app/api/projects/update:
+    put:
+      consumes:
+      - application/json
+      deprecated: false
+      operationId: updateUsingPUT_11
+      parameters:
+      - description: project
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Project'
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Project'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: update
+      tags:
+      - project-resource
+      x-codegen-request-body-name: project
+  /app/api/projects/{id}:
+    get:
+      deprecated: false
+      operationId: findByIdUsingGET_5
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+        x-example: abc
+      produces:
+      - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Project'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      summary: findById
+      tags:
+      - project-resource
+schemes:
+- http
+swagger: '2.0'
+tags:
+- description: Assignment Resource
+  name: assignment-resource
+- description: Authentication Resource
+  name: authentication-resource
+- description: Credential Resource
+  name: credential-resource
+- description: Department Resource
+  name: department-resource
+- description: Employee Resource
+  name: employee-resource
+- description: Location Resource
+  name: location-resource
+- description: Project Resource
+  name: project-resource
+x-components: {}

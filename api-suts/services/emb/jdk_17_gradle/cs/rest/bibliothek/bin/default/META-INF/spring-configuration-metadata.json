@@ -1,0 +1,32 @@
+{
+  "groups": [
+    {
+      "name": "app",
+      "type": "io.papermc.bibliothek.configuration.AppConfiguration",
+      "sourceType": "io.papermc.bibliothek.configuration.AppConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "app.api-base-url",
+      "type": "java.net.URL",
+      "sourceType": "io.papermc.bibliothek.configuration.AppConfiguration"
+    },
+    {
+      "name": "app.api-title",
+      "type": "java.lang.String",
+      "sourceType": "io.papermc.bibliothek.configuration.AppConfiguration"
+    },
+    {
+      "name": "app.api-version",
+      "type": "java.lang.String",
+      "sourceType": "io.papermc.bibliothek.configuration.AppConfiguration"
+    },
+    {
+      "name": "app.storage-path",
+      "type": "java.nio.file.Path",
+      "sourceType": "io.papermc.bibliothek.configuration.AppConfiguration"
+    }
+  ],
+  "hints": []
+}

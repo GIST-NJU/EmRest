@@ -1,0 +1,10 @@
+chardet
+loguru
+pandas
+python_Levenshtein
+requests
+spacy
+prance
+openapi-schema-validator
+openapi-spec-validator
+openapi3-parser
