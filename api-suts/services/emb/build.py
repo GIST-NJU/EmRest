@@ -3,7 +3,7 @@ if __name__ == "__main__":
     import subprocess
 
     SCRIPT_LOCATION = os.path.dirname(os.path.realpath(__file__))
-    PROJ_LOCATION = os.path.abspath(os.path.join(SCRIPT_LOCATION, os.pardir))
+    PROJ_LOCATION = os.path.abspath(os.path.join(os.path.dirname(SCRIPT_LOCATION), os.pardir))
 
     JAVA_8_ENV = os.path.join(PROJ_LOCATION, "java8.env")
 

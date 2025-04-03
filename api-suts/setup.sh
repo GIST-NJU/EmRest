@@ -1,2 +1,2 @@
-python ./emb/build.py
-python ./rl/build.py
+python ./services/emb/build.py
+python ./services/rl/build.py
