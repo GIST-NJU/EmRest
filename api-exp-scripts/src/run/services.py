@@ -364,4 +364,43 @@ services:
         subprocess.run(
             f"screen -dmS {sut.exp_name}_{port}_proxy mitmproxy --mode reverse:http://localhost:{port} -p {mitmproxy_port} -s {mitmproxy_script}",
             shell=True)
+    return port
 
+
+def find_service_by_name(name: str) -> Service:
+    for service in emb_services:
+        if service.exp_name.lower() == name.lower():
+            return service
+    for service in gitlab_services:
+        if service.exp_name.lower() == name.lower():
+            return service
+    available_services = [service.exp_name for service in emb_services + gitlab_services]
+    raise ValueError(f"Service '{name}' not found. Available services: {available_services}")
+
+@click.command()
+@click.option('--sut', type=str, required=True, help='Name of the service under test (SUT).')
+@click.option('--port', type=int, required=True, help='Port number on which the SUT will run.')
+@click.option('--output-dir', type=str, required=True, help='Directory to store the output results.')
+@click.option('--disable-mitmproxy', is_flag=True, default=False, help='Disable the use of mitmproxy.')
+@click.option('--disable-jacoco', is_flag=True, default=False, help='Disable the use of JaCoCo coverage.')
+def run_service(sut, port, output_dir, disable_mitmproxy, disable_jacoco):
+    """
+    CLI to run a service under test (SUT) with optional mitmproxy and JaCoCo.
+    """
+
+    service = find_service_by_name(sut)
+    use_mitmproxy = not disable_mitmproxy
+    use_jacoco = not disable_jacoco
+
+    if service.exp_name.startswith("gitlab-"):
+        port = run_gitlab_service(service, port, output_dir, use_mitmproxy)
+    else:
+        port = run_emb_service(service, port, output_dir, use_mitmproxy, use_jacoco)
+    click.echo(f"Starting service '{service.exp_name}' on port {port}.")
+    click.echo(f"Output will be stored in '{output_dir}'.")
+    click.echo(f"mitmproxy is {'enabled' if use_mitmproxy else 'disabled'}.")
+    click.echo(f"JaCoCo coverage is {'enabled' if use_jacoco else 'disabled'}.")
+
+
+if __name__ == "__main__"
+    cli()
