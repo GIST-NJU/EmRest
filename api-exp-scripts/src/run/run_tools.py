@@ -15,6 +15,7 @@ tools = [
 
 @click.command()
 @click.option('--tool', '-t', required=True, type=click.Choice(['emrest', 'arat-rl', 'morest', 'restct', 'miner', 'evomaster', 'schemathesis']), help='the REST APIs testing tool to use')
+@click.option('--sut', '-s', required=False, help='the API under test')
 @click.option('--swaggerV2', '-s2', required=False, help='the swagger file of the API under test, in v2 format')
 @click.option('--swaggerV3', '-s3', required=False, help='the swagger file of the API under test, in v3 format')
 @click.option('--budget', '-b', default=3600, help='Budget for each round, in seconds', show_default=True)
@@ -22,17 +23,31 @@ tools = [
 @click.option('--port', required=True, help='the port of the API under test')
 @click.option('--authKey', '-ak', help='the key of the authorization header')
 @click.option('--authValue', '-av', help='the value of the authorization header')
-def cli(tool, swaggerV2, swaggerV3, budget, output, port, authKey, authValue):
-    run_tool(tool, swaggerV2, swaggerV3, budget, output, port, authKey, authValue)
+def cli(tool, sut, swaggerV2, swaggerV3, budget, output, port, authKey, authValue):
+    run_tool(tool, sut, swaggerV2, swaggerV3, budget, output, port, authKey, authValue)
 
-def run_tool(tool, swaggerV2, swaggerV3, budget, output, port, authKey, authValue):
+def run_tool(tool, sut, swaggerV2, swaggerV3, budget, output, port, authKey=None, authValue=None):
     if tool.lower() not in tools:
         print("Unsupported tool: " + tool)
         return
-    
+
+    if sut == "languagetool":
+        server = f"http://localhost:{port}/v2"
+    elif sut == "restcountries":
+        server = f"http://localhost:{port}/rest"
+    elif sut == "restcountries":
+        server = f"http://localhost:{port}/api"
+    elif "gitlab" in sut:
+        server = f"http://localhost:{port}/api/v4"
+    else:
+        server = f"http://localhost:{port}"
+
     # TODO: specify the version of swagger used by each tool
-    swagger = swaggerV2
-    
+    if tool == "arat-rl":
+        swagger = swaggerV2
+    else:
+        swagger = swaggerV3
+
     if not os.path.exists(swagger):
         print("Swagger file not found: " + str(swagger))
         return
@@ -43,7 +58,7 @@ def run_tool(tool, swaggerV2, swaggerV3, budget, output, port, authKey, authValu
     if tool.lower() == 'emrest':
         run_emrest(swagger, budget, output, port, authKey, authValue)
     elif tool.lower() == 'arat-rl':
-        run_arat_rl(swagger, budget, output, port, authKey, authValue)
+        run_arat_rl(sut, swagger, budget, output, server, port, authKey, authValue)
     elif tool.lower() == 'morest':
         run_morest(swagger, budget, output, port, authKey, authValue)
     elif tool.lower() == 'restct':
@@ -102,9 +117,16 @@ def run_emrest(swagger, budget, output, server, authKey=None, authValue=None):
     subprocess.run(cmd, shell=True)
     print("EmRest is started")
 
-def run_arat_rl(swagger, budget, output, server, authKey=None, authValue=None):
-    # TODO: implement this
-    pass
+def run_arat_rl(sut, swagger, budget, output, server, port, authKey=None, authValue=None):
+
+    main_py = os.path.join("/root/nra/opensource/EmRest/api-tools/ARAT-RL", "main.py")
+
+    if authValue is None:
+        run = f"source activate rl && screen -dmS rl_{sut}_{port} bash -c 'python {main_py} {swagger} {server}'"
+    else:
+        run = f"source activate rl && screen -dmS rl_{sut}_{port} bash -c 'python {main_py} {swagger} {server} {authValue}'"
+
+    subprocess.run(run, shell=True)
 
 def run_morest(swagger, budget, output, server, authKey=None, authValue=None):
     # TODO: implement this
@@ -125,9 +147,6 @@ def run_evomaster(swagger, budget, output, server, authKey=None, authValue=None)
 def run_schemathesis(swagger, budget, output, server, authKey=None, authValue=None):
     # TODO: implement this
     pass
-
-
-    
 
 if __name__ == "__main__":
     cli()

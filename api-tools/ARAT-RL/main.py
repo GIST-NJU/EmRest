@@ -349,7 +349,8 @@ def analyze_information(spec):
     for path, path_data in spec['paths'].items():
         for method, operation_data in path_data.items():
             if method in ['get', 'post', 'put', 'delete', 'patch']:
-                operation_id = operation_data['operationId']
+                # operation_id = operation_data['operationId']
+                operation_id = path + method
                 operations.append({
                     'operation_id': operation_id,
                     'method': method,

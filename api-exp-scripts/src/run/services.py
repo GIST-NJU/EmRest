@@ -13,7 +13,7 @@ API_SUTS_FOLD = current_file.parents[3] / 'api-suts'
 if not os.path.exists(API_SUTS_FOLD):
     raise ValueError("API_SUTS_FOLD does not exist")
 
-JACOCO = API_SUTS_FOLD / "jacoco"
+JACOCO = API_SUTS_FOLD / "jacoco/jacocoagent.jar"
 if not os.path.exists(JACOCO):
     raise ValueError("JACOCO does not exist")
 
@@ -43,8 +43,8 @@ emb_services = [
         spec_file_v3="specifications/v3/feature-services.json",
         spec_file_v2="specifications/v2/features.yaml",
         jdk="java8.env",
-        service_path="emb/jdk_8_maven/cs/rest/original/features-service",
-        run_jar="emb/jdk_8_maven/em/embedded/rest/features-service/target/features-service-run.jar",
+        service_path="services/emb/jdk_8_maven/cs/rest/original/features-service",
+        run_jar="services/emb/jdk_8_maven/em/embedded/rest/features-service/target/features-service-run.jar",
         class_name="em.embedded.org.javiermf.features.Run",
         server_url="http://localhost:{port}",
         port=32000,
@@ -54,8 +54,8 @@ emb_services = [
         spec_file_v3="specifications/v3/languageTool.json",
         spec_file_v2="specifications/v2/languagetool.yaml",
         jdk="java8.env",
-        service_path="emb/jdk_8_maven/cs/rest/original/languagetool",
-        run_jar="emb/jdk_8_maven/em/embedded/rest/languagetool/target/languagetool-run.jar",
+        service_path="services/emb/jdk_8_maven/cs/rest/original/languagetool",
+        run_jar="services/emb/jdk_8_maven/em/embedded/rest/languagetool/target/languagetool-run.jar",
         class_name="em.embedded.org.languagetool.Run",
         server_url="http://localhost:{port}/v2",
         port=33000,
@@ -63,10 +63,10 @@ emb_services = [
     Service(
         exp_name="restcountries",
         spec_file_v3="specifications/v3/restcountries.yaml",
-        spec_file_v2="specifications/v3/restcountries.yaml",  # fixme: no v2 spec
+        spec_file_v2="specifications/v3/restcountries.yaml",
         jdk="java8.env",
-        service_path="emb/jdk_8_maven/cs/rest/original/restcountries",
-        run_jar="emb/jdk_8_maven/em/embedded/rest/restcountries/target/restcountries-run.jar",
+        service_path="services/emb/jdk_8_maven/cs/rest/original/restcountries",
+        run_jar="services/emb/jdk_8_maven/em/embedded/rest/restcountries/target/restcountries-run.jar",
         class_name="em.embedded.eu.fayder.Run",
         server_url="http://localhost:{port}/rest",
         port=35000,
@@ -76,8 +76,8 @@ emb_services = [
         spec_file_v3="specifications/v3/ncs.json",
         spec_file_v2="specifications/v2/ncs.yaml",
         jdk="java8.env",
-        service_path="emb/jdk_8_maven/cs/rest/artificial/ncs",
-        run_jar="emb/jdk_8_maven/em/embedded/rest/ncs/target/rest-ncs-run.jar",
+        service_path="services/emb/jdk_8_maven/cs/rest/artificial/ncs",
+        run_jar="services/emb/jdk_8_maven/em/embedded/rest/ncs/target/rest-ncs-run.jar",
         class_name="em.embedded.org.restncs",
         server_url="http://localhost:{port}",
         port=44000,
@@ -87,8 +87,8 @@ emb_services = [
         spec_file_v3="specifications/v3/scs.json",
         spec_file_v2="specifications/v2/scs.yaml",
         jdk="java8.env",
-        service_path="emb/jdk_8_maven/cs/rest/artificial/scs",
-        run_jar="emb/jdk_8_maven/em/embedded/rest/scs/target/rest-scs-run.jar",
+        service_path="services/emb/jdk_8_maven/cs/rest/artificial/scs",
+        run_jar="services/emb/jdk_8_maven/em/embedded/rest/scs/target/rest-scs-run.jar",
         class_name="em.embedded.org.restscs",
         server_url="http://localhost:{port}",
         port=45000,
@@ -98,8 +98,8 @@ emb_services = [
         spec_file_v3="specifications/v3/genome-nexus.json",
         spec_file_v2="specifications/v2/genome.yaml",
         jdk="java8.env",
-        service_path="emb/jdk_8_maven/cs/rest-gui/genome-nexus",
-        run_jar="emb/jdk_8_maven/em/embedded/rest/genome-nexus/target/genome-nexus-run.jar",
+        service_path="services/emb/jdk_8_maven/cs/rest-gui/genome-nexus",
+        run_jar="services/emb/jdk_8_maven/em/embedded/rest/genome-nexus/target/genome-nexus-run.jar",
         class_name="em.embedded.org.cbioportal.genome_nexus.Run",
         server_url="http://localhost:{port}",
         port=40000,
@@ -109,8 +109,8 @@ emb_services = [
         spec_file_v3="specifications/v3/market.json",
         spec_file_v2="specifications/v2/market.yaml",
         jdk="java11.env",
-        service_path="emb/jdk_11_maven/cs/rest-gui/market",
-        run_jar="emb/jdk_11_maven/em/embedded/rest/market/target/market-run.jar",
+        service_path="services/emb/jdk_11_maven/cs/rest-gui/market",
+        run_jar="services/emb/jdk_11_maven/em/embedded/rest/market/target/market-run.jar",
         class_name="em.embedded.market.Run",
         server_url="http://localhost:{port}",
         port=46000,
@@ -121,8 +121,8 @@ emb_services = [
         spec_file_v3="specifications/v3/person.json",
         spec_file_v2="specifications/v2/person.yaml",
         jdk="java8.env",
-        service_path="rl/person-controller",
-        run_jar="rl/person-controller/target/java-spring-boot-mongodb-starter-1.0.0.jar",
+        service_path="services/rl/person-controller",
+        run_jar="services/rl/person-controller/target/java-spring-boot-mongodb-starter-1.0.0.jar",
         class_name="com.mongodb.starter.ApplicationStarter",
         server_url="http://localhost:{port}",
         port=42000,
@@ -134,8 +134,8 @@ emb_services = [
         spec_file_v3="specifications/v3/user.json",
         spec_file_v2="specifications/v2/user.yaml",
         jdk="java8.env",
-        service_path="rl/user-management",
-        run_jar="rl/user-management/target/microdemo2-1.0.0-SNAPSHOT.jar",
+        service_path="services/rl/user-management",
+        run_jar="services/rl/user-management/target/microdemo2-1.0.0-SNAPSHOT.jar",
         class_name="com.giassi.microservice.demo2.Microservice2Application",
         server_url="http://localhost:{port}",
         port=43000,
@@ -148,8 +148,8 @@ emb_services = [
         spec_file_v3="specifications/v3/project.yaml",
         spec_file_v2="specifications/v2/project.yaml",
         jdk="java11.env",
-        service_path="rl/project-tracking-system",
-        run_jar="rl/project-tracking-system/target/project-tracking-system.jar",
+        service_path="services/rl/project-tracking-system",
+        run_jar="services/rl/project-tracking-system/target/project-tracking-system.jar",
         class_name="com.pfa.pack.ProjectTrackingSystemApplication",
         server_url="http://localhost:{port}",
         port=47000,
@@ -218,20 +218,20 @@ class CustomLogger:
     def request(self, flow):
         content = (
             "========REQUEST========\\n"
+            f"Unique Id: {{flow.id}}\\n"
             f"Method: {{flow.request.method}}\\n"
             f"URL: {{flow.request.pretty_url}}\\n"
             f"Request Data: {{flow.request.text}}\\n"
-            f"Unique Id: {{flow.id}}\\n"
         )
         self.write_to_file(content)
 
     def response(self, flow):
         content = (
             "========RESPONSE========\\n"
+            f"Unique Id: {{flow.id}}\\n"
             f"Timestamp: {{time.strftime('%Y-%m-%d %H:%M:%S')}}\\n"
             f"Status Code: {{flow.response.status_code}}\\n"
             f"Response Data: {{flow.response.text}}\\n"
-            f"Unique Id: {{flow.id}}\\n"
         )
         self.write_to_file(content)
 
@@ -255,19 +255,24 @@ def run_emb_service(sut: Service, port: int, output_dir: str, use_mimproxy: bool
                 f"sudo docker run --name={sut.exp_name}-mongo-{port} --restart=always -p {port}:27017 -d mongo:3.6.2",
                 shell=True,
             )
+            time.sleep(20)
         elif sut.exp_name == "user-management":
             subprocess.run(
                 f"sudo docker run -d -p {port}:3306 --name {sut.exp_name}-mysql-{port} -e MYSQL_ROOT_PASSWORD={sut.db_root_pwd} -e MYSQL_DATABASE={sut.db_database_name} mysql",
                 shell=True,
             )
+            time.sleep(90)
         else:
             raise Exception(f"Unknown db for {sut.exp_name}")
+
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
     if sut.has_db:
         db_port = port + 3
         _run_db(sut, db_port)
         db_port_command = str(db_port)
-        time.sleep(90)
+        # time.sleep(90)
     else:
         db_port_command = ""
 
@@ -304,8 +309,8 @@ def run_emb_service(sut: Service, port: int, output_dir: str, use_mimproxy: bool
             f"screen -dmS {sut.exp_name}_{port}_proxy mitmproxy --mode reverse:http://localhost:{port} -p {mimproxy_port} -s {m_script_file}",
             shell=True,
         )
-        return mimproxy_port
-    return port
+        return port, mimproxy_port
+    return port, None
 
 
 def get_gitlab_token(port: int):
@@ -329,6 +334,7 @@ def get_gitlab_token(port: int):
 
 def run_gitlab_service(sut: Service, port: int, output_dir: str, use_mimproxy: bool = True):
     def _generate_gitlab_compose_file(gitlab_port: int, compose_file: str):
+        # TODO: replaced with the gitlab with line coverage
         content = f"""
 version: '3'
 services:
@@ -364,7 +370,8 @@ services:
         subprocess.run(
             f"screen -dmS {sut.exp_name}_{port}_proxy mitmproxy --mode reverse:http://localhost:{port} -p {mitmproxy_port} -s {mitmproxy_script}",
             shell=True)
-    return port
+        return port, mitmproxy_port
+    return port, None
 
 
 def find_service_by_name(name: str) -> Service:
@@ -402,5 +409,5 @@ def run_service(sut, port, output_dir, disable_mitmproxy, disable_jacoco):
     click.echo(f"JaCoCo coverage is {'enabled' if use_jacoco else 'disabled'}.")
 
 
-if __name__ == "__main__"
+if __name__ == "__main__":
     cli()
