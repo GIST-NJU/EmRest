@@ -117,6 +117,9 @@ poetry run python -m emrest_core.algorithms \
     --server http://localhost:8080/v2
 ```
 
+- Since this example is run on Linux, we use the PICT binary located at `./lib/pict-linux`.
+- All outputs, including logs and test results, will be stored in the `./results` directory (based on the experiment name test).
+
 ## Replicate Study
 
 EmRest has been accepted at ISSTA 2025.  
