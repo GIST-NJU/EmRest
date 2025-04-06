@@ -21,11 +21,11 @@ if not os.path.exists(JACOCO):
 @dataclass(frozen=True)
 class Service:
     exp_name: str
-    has_db: bool = False
     spec_file_v3: str
     spec_file_v2: str
     server_url: str
     port: int
+    has_db: bool = False
     header_auth = None
     query_auth = None
     jdk: Optional[str] = None
