@@ -12,6 +12,7 @@
 - [☑️] 添加检测覆盖率脚本文件```gitlab_cov.py```在api-suts文件夹内
 
 - [☑️] fixbug：修改```services.py```的dataclass类中的has_db参数位置，默认参数不能在非默认参数之前
+- [☑️] 添加新版本的jacoco文件
 
 **EmRest** is a black-box testing tool specifically designed for testing REST APIs. It accepts a Swagger specification file as input and enhances testing for both nominal and exceptional scenarios by
 leveraging error messages from HTTP responses.
