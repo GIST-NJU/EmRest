@@ -1,7 +1,15 @@
 # EmRest: A Black-Box Testing Tool for REST APIs
 
-- [ ] 检查 specification 更新是否为最新版
+## TODO
+
+- [☑️] 检查 specification 更新是否为最新版（4月6日已检查，均为最新版）
 - [ ] 更新 api-exp-scripts
+
+## 修改记录
+### 4月6日
+- [☑️] 修改```services.py```中GitLab版本至有覆盖率版本，并将密码设置为```MySuperSecretAndSecurePassw0rd!```
+- [☑️] 为```services.py```中的proxy文件添加Unique Id
+- [☑️] 添加检测覆盖率脚本文件```gitlab_cov.py```在api-suts文件夹内
 
 **EmRest** is a black-box testing tool specifically designed for testing REST APIs. It accepts a Swagger specification file as input and enhances testing for both nominal and exceptional scenarios by
 leveraging error messages from HTTP responses.

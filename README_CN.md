@@ -16,6 +16,8 @@ sh setup.sh
 - [☑️] 修改```setup.sh```的build.py路径
 - [☑️] 修改```build.py```的PROJ_LOCATION路径，使用脚本位置设置路径
 
+- [☑️] 修改```services```中GitLab版本至有覆盖率版本
+
 # 运行试验
 ## 运行SUT
 ### EMB

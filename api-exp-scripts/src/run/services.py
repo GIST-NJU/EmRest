@@ -63,7 +63,7 @@ emb_services = [
     Service(
         exp_name="restcountries",
         spec_file_v3="specifications/v3/restcountries.yaml",
-        spec_file_v2="specifications/v3/restcountries.yaml",  # fixme: rl能支持？
+        spec_file_v2="specifications/v3/restcountries.yaml",  # fixme: no v2 spec
         jdk="java8.env",
         service_path="emb/jdk_8_maven/cs/rest/original/restcountries",
         run_jar="emb/jdk_8_maven/em/embedded/rest/restcountries/target/restcountries-run.jar",
@@ -153,18 +153,7 @@ emb_services = [
         class_name="com.pfa.pack.ProjectTrackingSystemApplication",
         server_url="http://localhost:{port}",
         port=47000,
-    ),
-    # Service(
-    #     exp_name="project",
-    #     spec_file_v3="specifications/v3/project.yaml",
-    #     spec_file_v2="specifications/v2/project.yaml",
-    #     jdk="java11.env",
-    #     service_path="rl/project-tracking-system",
-    #     run_jar="rl/project-tracking-system/target/project-tracking-system.jar",
-    #     class_name="com.pfa.pack.ProjectTrackingSystemApplication",
-    #     server_url="http://localhost:{port}",
-    #     port=47000,
-    # ),
+    )
 ]
 
 gitlab_services = [
@@ -212,8 +201,9 @@ gitlab_services = [
     ),
 ]
 
+
 def _generate_mitmproxy_script(py_name: str, filename: str):
-        script_content = f"""
+    script_content = f"""
 import mitmproxy
 import time
 
@@ -231,6 +221,7 @@ class CustomLogger:
             f"Method: {{flow.request.method}}\\n"
             f"URL: {{flow.request.pretty_url}}\\n"
             f"Request Data: {{flow.request.text}}\\n"
+            f"Unique Id: {{flow.id}}\\n"
         )
         self.write_to_file(content)
 
@@ -240,17 +231,18 @@ class CustomLogger:
             f"Timestamp: {{time.strftime('%Y-%m-%d %H:%M:%S')}}\\n"
             f"Status Code: {{flow.response.status_code}}\\n"
             f"Response Data: {{flow.response.text}}\\n"
+            f"Unique Id: {{flow.id}}\\n"
         )
         self.write_to_file(content)
 
 
 addons = [CustomLogger()]
 """
-        with open(py_name, "w") as f:
-            f.write(script_content)
- 
+    with open(py_name, "w") as f:
+        f.write(script_content)
 
-def run_emb_service(sut: Service, port: int, output_dir: str, use_mimproxy: bool = True, use_jacoco: bool = True):   
+
+def run_emb_service(sut: Service, port: int, output_dir: str, use_mimproxy: bool = True, use_jacoco: bool = True):
     def _create_jacoco_command(exp_name: str, j_port: int, jacoco_output_dir: str):
         if JACOCO is None:
             return ""
@@ -270,7 +262,6 @@ def run_emb_service(sut: Service, port: int, output_dir: str, use_mimproxy: bool
             )
         else:
             raise Exception(f"Unknown db for {sut.exp_name}")
-            
 
     if sut.has_db:
         db_port = port + 3
@@ -325,7 +316,7 @@ def get_gitlab_token(port: int):
             res = requests.post(f"http://localhost:{port}/oauth/token", data={
                 "grant_type": "password",
                 "username": "root",
-                "password": "root1234"
+                "password": "MySuperSecretAndSecurePassw0rd!"
             })
             token = res.json()["access_token"]
             break
@@ -338,29 +329,26 @@ def get_gitlab_token(port: int):
 
 def run_gitlab_service(sut: Service, port: int, output_dir: str, use_mimproxy: bool = True):
     def _generate_gitlab_compose_file(gitlab_port: int, compose_file: str):
-        # TODO: replaced with the gitlab with line coverage
         content = f"""
 version: '3'
 services:
   web:
-    image: 'gitlab/gitlab-ce:13.10.3-ce.0'
-    container_name: 'gitlab-{gitlab_port}'
+    image: 'witcan/gitlab-ee-api:latest'
+    container_name: 'gitlab-{port}'
     restart: always
     user: "0"
     hostname: 'gitlab.example.com'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'http://gitlab.example.com'
-        gitlab_rails['initial_root_password'] = "root1234"
+        gitlab_rails['initial_root_password'] = "MySuperSecretAndSecurePassw0rd!"
     ports:
       - '{gitlab_port}:80'
     shm_size: '256m'
-
     """
         with open(compose_file, "w") as f:
             f.write(content)
 
-    
     docker_compose_dir = os.path.join(output_dir, f"{sut.exp_name}_{port}")
     os.makedirs(docker_compose_dir, exist_ok=True)
     docker_compose_file = os.path.join(docker_compose_dir, "docker-compose.yml")
