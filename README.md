@@ -22,6 +22,9 @@
 ### 4月7日
 
 - [☑️] 修改```replicate.py```中run_tools_on_emb_services的sleep时间为90秒，如果性能不佳需更长时间，否则服务为启动执行tools会导致工具中断
+- [☑️] 修改```replicate.py```中两个run_tools_on的port逻辑，suts.append((s.exp_name, api_port, mimproxy_port, s.spec_file_v2, s.spec_file_v3))将两个端口一起添加，并根据情况选择端口，这是为了在代理中不出现gitlab的token请求
+- [☑️] 修改```replicate.py```中run_tools_on_gitlab_services，添加coverage支持
+
 
 **EmRest** is a black-box testing tool that leverages error message analysis to enhance the generation of both valid and exceptional test inputs for REST APIs.  
 EmRest has been accepted at **ISSTA 2025**. This repository contains its implementation, benchmarks, baselines, and experiment scripts.
