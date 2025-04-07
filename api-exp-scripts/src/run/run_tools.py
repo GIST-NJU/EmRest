@@ -13,7 +13,11 @@ tools = [
     'schemathesis'
 ]
 
-TOOL_FOLD = Path(__file__).parents[3] / "api-tools"
+TOOL_ROOT = Path(__file__).parents[3] / "api-tools"
+API_ROOT = Path(__file__).parents[3] / "api-suts"
+JDK_8 = os.path.join(API_ROOT, "java8.env")
+JDK_11 = os.path.join(API_ROOT, "java11.env")
+JDK_17 = os.path.join(API_ROOT, "java17.env")
 
 
 @click.command()
@@ -25,7 +29,7 @@ TOOL_FOLD = Path(__file__).parents[3] / "api-tools"
 @click.option('--swaggerV3', '-s3', required=False, help='the swagger file of the API under test, in v3 format')
 @click.option('--budget', '-b', default=3600, help='Budget for each round, in seconds', show_default=True)
 @click.option('--output', '-o', required=True, help='Output directory')
-@click.option('--serverUrl', required=True, help='the URL of the REST API Server')
+@click.option('--serverUrl', required=True, help='the URL of the REST API Server, e.g., http://localhost:8080/api')
 @click.option('--authKey', '-ak', help='the key of the authorization header')
 @click.option('--authValue', '-av', help='the value of the authorization header')
 def cli(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey, authValue):
@@ -33,43 +37,58 @@ def cli(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey,
 
 
 def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey=None, authValue=None):
-    if tool.lower() not in tools:
-        print("Unsupported tool: " + tool)
-        return
+    def validate():
+        if not tool:
+            raise Exception("Tool not specified")
+        if tool not in tools:
+            raise Exception(f"Use one of the following tools: {tools}")
+        if not swaggerV2 and not swaggerV3:
+            raise Exception("Swagger file not specified, please specify swaggerV2 or swaggerV3")
+        if not output:
+            raise Exception("Output directory not specified (Output directory if any results are generated)")")
+        if not serverUrl:
+            raise Exception("Server URL not specified (the URL of the REST API Server, e.g., http://localhost:8080/api)")
+    
+    def choose_swagger_version():
+        # TODO: specify the version of swagger used by each tool
+        if tool == "arat-rl":
+            if swaggerV2:
+                return swaggerV2
+            else:
+                raise Exception("arat-rl requires swagger in v2 format, but swaggerV2 is not specified")
+        else:
+            raise Exception("Not Implemented for other tools")
 
-    # TODO: specify the version of swagger used by each tool
-    if tool == "arat-rl":
-        swagger = swaggerV2
-    else:
-        swagger = swaggerV3
-
+    tool = tool.lower()
+    validate()
+    swagger = choose_swagger_version()
     if not os.path.exists(swagger):
-        print("Swagger file not found: " + str(swagger))
-        return
+        raise Exception("Swagger file not found: " + str(swagger))
+        
     output = Path(output)
     if not output.exists():
         os.mkdir(output)
 
-    if tool.lower() == 'emrest':
+    if tool == 'emrest':
         run_emrest(swagger, budget, output, port, authKey, authValue)
-    elif tool.lower() == 'arat-rl':
+    elif tool == 'arat-rl':
         run_arat_rl(expName, swagger, budget, output, serverUrl, authKey, authValue)
-    elif tool.lower() == 'morest':
+    elif tool == 'morest':
         run_morest(swagger, budget, output, port, authKey, authValue)
-    elif tool.lower() == 'restct':
+    elif tool == 'restct':
         run_restct(swagger, budget, output, port, authKey, authValue)
-    elif tool.lower() == 'miner':
+    elif tool == 'miner':
         run_miner(swagger, budget, output, port, authKey, authValue)
-    elif tool.lower() == 'evomaster':
+    elif tool == 'evomaster':
         run_evomaster(expName, swagger, budget, output, serverUrl, authKey, authValue)
-    elif tool.lower() == 'schemathesis':
+    elif tool == 'schemathesis':
         run_schemathesis(swagger, budget, output, port, authKey, authValue)
     else:
         print("Unsupported tool: " + tool)
         return
 
 
-def run_emrest(swagger, budget, output, server, authKey=None, authValue=None):
+def run_emrest(swagger, budget, output, serverUrl, authKey=None, authValue=None):
     """generate bash scripts for running emrest"""
     # enter the emrest folder to use poetry
     emrest_fold = Path(__file__).parents[3] / "EmRest"
@@ -114,38 +133,36 @@ def run_emrest(swagger, budget, output, server, authKey=None, authValue=None):
     print("EmRest is started")
 
 
-def run_arat_rl(expName, swagger, budget, output, server, authKey=None, authValue=None):
-    main_py = os.path.join(f"{TOOL_FOLD}/ARAT-RL", "main.py")
+def run_arat_rl(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
+    main_py = os.path.join(f"{TOOL_ROOT}/ARAT-RL", "main.py")
 
     if authValue is None:
-        run = f"source activate arat-rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {server} > {output}/log.log 2>&1\""
+        run = f"source activate arat-rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} > {output}/log.log 2>&1\""
     else:
-        run = f"source activate arat-rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {server} {authValue} > {output}/log.log 2>&1\""
+        run = f"source activate arat-rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {authValue} > {output}/log.log 2>&1\""
 
     subprocess.run(run, shell=True)
 
 
-def run_morest(swagger, budget, output, server, authKey=None, authValue=None):
+def run_morest(swagger, budget, output, serverUrl, authKey=None, authValue=None):
     # TODO: implement this
     pass
 
 
-def run_restct(swagger, budget, output, server, authKey=None, authValue=None):
+def run_restct(swagger, budget, output, serverUrl, authKey=None, authValue=None):
     # TODO: implement this
     pass
 
 
-def run_miner(swagger, budget, output, server, authKey=None, authValue=None):
+def run_miner(swagger, budget, output, serverUrl, authKey=None, authValue=None):
     # TODO: implement this
     pass
 
 
-def run_evomaster(expName, swagger, budget, output, server, authKey=None, authValue=None):
-    evo_home = os.path.join(TOOL_FOLD, "evomaster.jar")
+def run_evomaster(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
+    evo_home = os.path.join(TOOL_ROOT, "evomaster.jar")
 
-    java_8 = Path(__file__).parents[3] / "api-suts/java8.env"
-
-    run_evo = f". {java_8} && java -jar {evo_home} --blackBox true --bbSwaggerUrl file://{swagger} --bbTargetUrl {server} --outputFormat JAVA_JUNIT_4 --maxTime 1h --outputFolder {output}"
+    run_evo = f". {JDK_8} && java -jar {evo_home} --blackBox true --bbSwaggerUrl file://{swagger} --bbTargetUrl {serverUrl} --outputFormat JAVA_JUNIT_4 --maxTime 1h --outputFolder {output}"
     if authValue is not None:
         run_evo += f" --header0 'Authorization: Bearer {authValue}'"
     run = f"screen -dmS evomaster_{expName} bash -c \"{run_evo} > {output}/log.log 2>&1\""
