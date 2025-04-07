@@ -38,7 +38,7 @@ def run_tools_on_emb_services(used_tools: list[str], used_services: list[Service
                 else:
                     suts.append((s.exp_name, api_port, s.spec_file_v2, s.spec_file_v3))
 
-            time.sleep(10)
+            time.sleep(90)
 
             spec_fold = Path(__file__).parents[3] / "api-suts"
 
@@ -61,11 +61,10 @@ def run_tools_on_emb_services(used_tools: list[str], used_services: list[Service
 
 def run_tools_on_gitlab_services(used_tools: list[str], used_services: list[Service], repeats: int,
                                  budget_per_round: int, result_dir):
-    # TODO: it is the same as run_tools_on_emb_services now
     for t in used_tools:
         for i in range(repeats):
             print(f'Running {t} {i + 1}/{repeats}')
-            temp_dir = os.path.join(result_dir, f"round{i + 1}")
+            temp_dir = os.path.join(result_dir, t, f"round{i + 1}")
             if not os.path.exists(temp_dir):
                 os.makedirs(temp_dir)
             suts = []
@@ -150,5 +149,5 @@ if __name__ == '__main__':
             continue
         services_to_run.append(sut)
 
-    run_tools_on_emb_services(tools, services_to_run, 1, 3600, "/root/nra/opensource/output")
-    # run_tools_on_gitlab_services(tools, services_to_run, 1, 3600, "/root/nra/opensource/output_emb")
+    run_tools_on_emb_services(tools, services_to_run, 1, 3600, "/root/nra/opensource/output/emb")
+    # run_tools_on_gitlab_services(tools, services_to_run, 1, 3600, "/root/nra/opensource/output_gitlab")

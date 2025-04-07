@@ -5,6 +5,7 @@
 - [ ] 更新 api-exp-scripts
 
 ## 修改记录
+环境配置等信息见README_CN.md
 ### 4月6日
 - [☑️] 修改```services.py```中GitLab版本至有覆盖率版本，并将密码设置为```MySuperSecretAndSecurePassw0rd!```
 - [☑️] 为```services.py```中的proxy文件添加Unique Id
@@ -17,6 +18,10 @@
 - [☑️] ```services.py```中修改use_mimproxy的返回逻辑，返回sut的port以及mitmproxy的port，分开返回，更清楚
 - [☑️] ```services.py```中修改_run_db的sleep位置，将sleep时间放在```_run_db```函数中，根据不同sut设置不同的sleep时间
 - [☑️] finish todo：```run_tools.py```中完成arat-rl的代码
+
+### 4月7日
+
+- [☑️] 修改```replicate.py```中run_tools_on_emb_services的sleep时间为90秒，如果性能不佳需更长时间，否则服务为启动执行tools会导致工具中断
 
 **EmRest** is a black-box testing tool that leverages error message analysis to enhance the generation of both valid and exceptional test inputs for REST APIs.  
 EmRest has been accepted at **ISSTA 2025**. This repository contains its implementation, benchmarks, baselines, and experiment scripts.

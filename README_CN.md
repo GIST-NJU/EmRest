@@ -8,6 +8,14 @@ Gradle
 
 修改.env中路径
 
+## ARAT-RL
+- Python版本 >=3.9
+- 配置文件requirements.txt可用，直接pip install -r requirements.txt即可
+
+## MoRest
+
+## RestCT
+
 ## 打包SUT
 ```bash
 cd api-suts
@@ -24,5 +32,5 @@ sh setup.sh
 
 ### GitLab
 
-
+python /root/nra/opensource/EmRest/api-tools/ARAT-RL/main.py /root/nra/opensource/EmRest/api-suts/specifications/v2/languagetool.yaml http://localhost:33001/v2
 

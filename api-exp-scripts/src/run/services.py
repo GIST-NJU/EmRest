@@ -363,8 +363,8 @@ services:
 
     if use_mimproxy:
         mitmproxy_port = port + 1
-        mitmproxy_script = os.path.join(output_dir, f"{sut.exp_name}_{port}.py")
-        mitmproxy_output = os.path.join(output_dir, f"{sut.exp_name}_{port}_proxy.txt")
+        mitmproxy_script = os.path.join(output_dir, f"mitmproxy_{sut.exp_name}_{port}.py")
+        mitmproxy_output = os.path.join(output_dir, f"mitmproxy_{sut.exp_name}_{port}_proxy.txt")
         _generate_mitmproxy_script(mitmproxy_script, mitmproxy_output)
 
         subprocess.run(

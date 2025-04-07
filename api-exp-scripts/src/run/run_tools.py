@@ -4,17 +4,20 @@ import subprocess
 from pathlib import Path
 
 tools = [
-    'emrest', 
-    'arat-rl', 
-    'morest', 
-    'restct', 
-    'miner', 
-    'evomaster', 
+    'emrest',
+    'arat-rl',
+    'morest',
+    'restct',
+    'miner',
+    'evomaster',
     'schemathesis'
 ]
 
+
 @click.command()
-@click.option('--tool', '-t', required=True, type=click.Choice(['emrest', 'arat-rl', 'morest', 'restct', 'miner', 'evomaster', 'schemathesis']), help='the REST APIs testing tool to use')
+@click.option('--tool', '-t', required=True,
+              type=click.Choice(['emrest', 'arat-rl', 'morest', 'restct', 'miner', 'evomaster', 'schemathesis']),
+              help='the REST APIs testing tool to use')
 @click.option('--sut', '-s', required=False, help='the API under test')
 @click.option('--swaggerV2', '-s2', required=False, help='the swagger file of the API under test, in v2 format')
 @click.option('--swaggerV3', '-s3', required=False, help='the swagger file of the API under test, in v3 format')
@@ -25,6 +28,7 @@ tools = [
 @click.option('--authValue', '-av', help='the value of the authorization header')
 def cli(tool, sut, swaggerV2, swaggerV3, budget, output, port, authKey, authValue):
     run_tool(tool, sut, swaggerV2, swaggerV3, budget, output, port, authKey, authValue)
+
 
 def run_tool(tool, sut, swaggerV2, swaggerV3, budget, output, port, authKey=None, authValue=None):
     if tool.lower() not in tools:
@@ -73,6 +77,7 @@ def run_tool(tool, sut, swaggerV2, swaggerV3, budget, output, port, authKey=None
         print("Unsupported tool: " + tool)
         return
 
+
 def run_emrest(swagger, budget, output, server, authKey=None, authValue=None):
     """generate bash scripts for running emrest"""
     # enter the emrest folder to use poetry
@@ -80,7 +85,7 @@ def run_emrest(swagger, budget, output, server, authKey=None, authValue=None):
     if not emrest_fold.exists():
         print("EmRest folder not found")
         return
-    
+
     # choose the right PICT tool based on the system architecture
     if Path('/usr/bin/dpkg').exists():
         pict = 'pict-linux'
@@ -93,7 +98,7 @@ def run_emrest(swagger, budget, output, server, authKey=None, authValue=None):
     if not os.path.exists(pict):
         print("PICT tool not found")
         return
-    
+
     # use swagger file name as exp_name
     exp_name = os.path.basename(swagger).split('.')[0]
 
@@ -117,36 +122,42 @@ def run_emrest(swagger, budget, output, server, authKey=None, authValue=None):
     subprocess.run(cmd, shell=True)
     print("EmRest is started")
 
-def run_arat_rl(sut, swagger, budget, output, server, port, authKey=None, authValue=None):
 
+def run_arat_rl(sut, swagger, budget, output, server, port, authKey=None, authValue=None):
     main_py = os.path.join("/root/nra/opensource/EmRest/api-tools/ARAT-RL", "main.py")
 
     if authValue is None:
-        run = f"source activate rl && screen -dmS rl_{sut}_{port} bash -c 'python {main_py} {swagger} {server}'"
+        run = f"source activate arat-rl && screen -dmS rl_{sut}_{port} bash -c 'python {main_py} {swagger} {server}'"
     else:
-        run = f"source activate rl && screen -dmS rl_{sut}_{port} bash -c 'python {main_py} {swagger} {server} {authValue}'"
+        run = f"source activate arat-rl && screen -dmS rl_{sut}_{port} bash -c 'python {main_py} {swagger} {server} {authValue}'"
 
     subprocess.run(run, shell=True)
+
 
 def run_morest(swagger, budget, output, server, authKey=None, authValue=None):
     # TODO: implement this
     pass
 
+
 def run_restct(swagger, budget, output, server, authKey=None, authValue=None):
     # TODO: implement this
     pass
+
 
 def run_miner(swagger, budget, output, server, authKey=None, authValue=None):
     # TODO: implement this
     pass
 
+
 def run_evomaster(swagger, budget, output, server, authKey=None, authValue=None):
     # TODO: implement this
     pass
 
+
 def run_schemathesis(swagger, budget, output, server, authKey=None, authValue=None):
     # TODO: implement this
     pass
+
 
 if __name__ == "__main__":
     cli()
