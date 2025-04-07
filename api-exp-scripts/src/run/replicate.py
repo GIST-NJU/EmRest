@@ -36,7 +36,7 @@ def run_tools_on_emb_services(used_tools: list[str], used_services: list[Service
                 print(f"    {s.exp_name} is running on port {api_port}")
                 if mimproxy_port is not None:
                     print(f"    mitmproxy of {s.exp_name} is running on port {mimproxy_port}")
-                suts.append((s.exp_name, api_port, mimproxy_port, s.spec_file_v2, s.spec_file_v3))
+                suts.append((s, api_port, mimproxy_port))
 
             time.sleep(90)
 
@@ -47,16 +47,19 @@ def run_tools_on_emb_services(used_tools: list[str], used_services: list[Service
                     test_port = s[1]
                 else:
                     test_port = s[2]
+
+                server = s[0].server_url.format(port=test_port)
+
                 run_tool(
                     tool=t,
-                    sut=s[0],
-                    swaggerV2=os.path.join(sut_fold, s[3]),
-                    swaggerV3=os.path.join(sut_fold, s[4]),
+                    expName=s[0].exp_name,
+                    swaggerV2=os.path.join(sut_fold, s[0].spec_file_v2),
+                    swaggerV3=os.path.join(sut_fold, s[0].spec_file_v3),
                     budget=budget_per_round,
-                    output=os.path.join(temp_dir, s[0]),
-                    port=test_port,
+                    output=os.path.join(temp_dir, s[0].exp_name),
+                    serverUrl=server,
                 )
-                print(f"    {t} is testing {s[0]} for {budget_per_round} seconds")
+                print(f"    {t} is testing {s[0].exp_name} for {budget_per_round} seconds")
 
             time.sleep(budget_per_round)
             clean_all()
@@ -83,7 +86,7 @@ def run_tools_on_gitlab_services(used_tools: list[str], used_services: list[Serv
                 print(f"    {s.exp_name} is running on port {api_port}")
                 if mimproxy_port is not None:
                     print(f"    mitmproxy of {s.exp_name} is running on port {mimproxy_port}")
-                suts.append((s.exp_name, api_port, mimproxy_port, s.spec_file_v2, s.spec_file_v3))
+                suts.append((s, api_port, mimproxy_port))
 
             time.sleep(600)
 
@@ -92,11 +95,11 @@ def run_tools_on_gitlab_services(used_tools: list[str], used_services: list[Serv
             tokens = {}
             for s in suts:
                 token = get_gitlab_token(s[1])
-                tokens[s[0]] = token
+                tokens[s[0].exp_name] = token
                 requests.post(f"http://localhost:{s[1]}/api/v4/templates/reset_coverage")
 
                 subprocess.run(
-                    f"screen -dmS gitlab_{s[0]}_runtime_cov bash -c 'python {sut_fold}/gitlab_cov.py {os.path.join(temp_dir, s[0])} {s[0]} {s[1]}'",
+                    f"screen -dmS gitlab_{s[0].exp_name}_runtime_cov bash -c 'python {sut_fold}/gitlab_cov.py {os.path.join(temp_dir, s[0].exp_name)} {s[0].exp_name} {s[1]}'",
                     shell=True)
 
             for s in suts:
@@ -104,21 +107,22 @@ def run_tools_on_gitlab_services(used_tools: list[str], used_services: list[Serv
                     test_port = s[1]
                 else:
                     test_port = s[2]
+                server = s[0].server_url.format(port=test_port)
                 run_tool(
                     tool=t,
-                    sut=s[0],
-                    swaggerV2=os.path.join(sut_fold, s[3]),
-                    swaggerV3=os.path.join(sut_fold, s[4]),
+                    expName=s[0].exp_name,
+                    swaggerV2=os.path.join(sut_fold, s[0].spec_file_v2),
+                    swaggerV3=os.path.join(sut_fold, s[0].spec_file_v3),
                     budget=budget_per_round,
-                    output=os.path.join(temp_dir, s[0]),
-                    port=test_port,
-                    authValue=tokens[s[0]],
+                    output=os.path.join(temp_dir, s[0].exp_name),
+                    serverUrl=server,
+                    authValue=tokens[s[0].exp_name],
                 )
-                print(f"    {t} is testing {s[0]} for {budget_per_round} seconds")
+                print(f"    {t} is testing {s[0].exp_name} for {budget_per_round} seconds")
             time.sleep(budget_per_round)
             for s in suts:
                 coverage = requests.get(f"http://localhost:{s[1]}/api/v4/templates/get_coverage").json()
-                with open(f"{os.path.join(temp_dir, s[0])}/{s[0]}_coverage.json", "w") as f:
+                with open(f"{os.path.join(temp_dir, s[0].exp_name)}/{s[0].exp_name}_coverage.json", "w") as f:
                     json.dump(coverage, f)
             clean_all()
             time.sleep(30)
