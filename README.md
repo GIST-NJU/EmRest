@@ -2,7 +2,8 @@
 ## TODO
 
 - [☑️] 检查 specification 更新是否为最新版（4月6日已检查，均为最新版）
-- [ ] 更新 api-exp-scripts
+- [] 更新 api-exp-scripts
+
 
 ## 修改记录
 环境配置等信息见README_CN.md
