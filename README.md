@@ -35,6 +35,7 @@
 - [☑️] 完成```run_tools.py```的morest命令，修改morest的主文件fuzzer.py，添加timebudget支持
 - [☑️] 完成```run_tools.py```的miner命令,支持budget，使用小时数，用budget/3600赋值
 - [☑️] 完成```run_tools.py```的restct以及schemathesis命令，schemathesis本身无budget，budget参数控制cli.py中循环的时间
+- [☑️] 删除```run_tools.py```中工具中的无用参数
 
 **EmRest** is a black-box testing tool that leverages error message analysis to enhance the generation of both valid and exceptional test inputs for REST APIs.  
 EmRest has been accepted at **ISSTA 2025**. This repository contains its implementation, benchmarks, baselines, and experiment scripts.

@@ -73,17 +73,17 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
     if tool == 'emrest':
         run_emrest(expName, swagger, budget, output, serverUrl, authKey, authValue)
     elif tool == 'arat-rl':
-        run_arat_rl(expName, swagger, budget, output, serverUrl, authKey, authValue)
+        run_arat_rl(expName, swagger, budget, output, serverUrl, authValue)
     elif tool == 'morest':
-        run_morest(expName, swagger, budget, output, serverUrl, authKey, authValue)
+        run_morest(expName, swagger, budget, output, serverUrl, authValue)
     elif tool == 'restct':
-        run_restct(expName, swagger, budget, output, serverUrl, authKey, authValue)
+        run_restct(expName, swagger, budget, output, serverUrl, authValue)
     elif tool == 'miner':
-        run_miner(expName, swagger, budget, output, serverUrl, authKey, authValue)
+        run_miner(expName, swagger, budget, output, authValue)
     elif tool == 'evomaster':
-        run_evomaster(expName, swagger, budget, output, serverUrl, authKey, authValue)
+        run_evomaster(expName, swagger, budget, output, serverUrl, authValue)
     elif tool == 'schemathesis':
-        run_schemathesis(expName, swagger, budget, output, serverUrl, authKey, authValue)
+        run_schemathesis(expName, swagger, budget, output, serverUrl, authValue)
     else:
         print("Unsupported tool: " + tool)
         return
@@ -134,7 +134,7 @@ def run_emrest(expName, swagger, budget, output, serverUrl, authKey=None, authVa
     print("EmRest is started")
 
 
-def run_arat_rl(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
+def run_arat_rl(expName, swagger, budget, output, serverUrl, authValue=None):
 
     main_py = os.path.join(f"{TOOL_ROOT}/ARAT-RL", "main.py")
 
@@ -146,7 +146,7 @@ def run_arat_rl(expName, swagger, budget, output, serverUrl, authKey=None, authV
     subprocess.run(run, shell=True)
 
 
-def run_morest(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
+def run_morest(expName, swagger, budget, output, serverUrl, authValue=None):
     main_py = os.path.join(f"{TOOL_ROOT}/morest", "fuzzer.py")
 
     if authValue is None:
@@ -157,7 +157,7 @@ def run_morest(expName, swagger, budget, output, serverUrl, authKey=None, authVa
     subprocess.run(run, shell=True)
 
 
-def run_restct(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
+def run_restct(expName, swagger, budget, output, serverUrl, authValue=None):
     output_dir = os.path.join(output, f"exp_out")
     os.makedirs(output_dir, exist_ok=True)
 
@@ -195,7 +195,7 @@ def run_restct(expName, swagger, budget, output, serverUrl, authKey=None, authVa
     subprocess.run(run, shell=True)
 
 
-def run_miner(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
+def run_miner(expName, swagger, budget, output, authValue=None):
     def write_token(destination, token):
         token_file = os.path.join(destination, "token.txt")
         token = """
@@ -236,7 +236,7 @@ Authorization: Bearer token
     subprocess.run(f"cd {destination} && {run}", shell=True)
 
 
-def run_evomaster(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
+def run_evomaster(expName, swagger, budget, output, serverUrl, authValue=None):
 
     evo_home = os.path.join(TOOL_ROOT, "evomaster.jar")
 
@@ -251,7 +251,7 @@ def run_evomaster(expName, swagger, budget, output, serverUrl, authKey=None, aut
     subprocess.run(run, shell=True)
 
 
-def run_schemathesis(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
+def run_schemathesis(expName, swagger, budget, output, serverUrl, authValue=None):
     cli_file = os.path.join(TOOL_ROOT, "schemathesis_cli.py")
 
     if authValue is None:

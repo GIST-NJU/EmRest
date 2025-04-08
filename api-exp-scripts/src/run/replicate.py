@@ -116,6 +116,7 @@ def run_tools_on_gitlab_services(used_tools: list[str], used_services: list[Serv
                     budget=budget_per_round,
                     output=os.path.join(temp_dir, s[0].exp_name),
                     serverUrl=server,
+                    authKey="Authorization",
                     authValue=tokens[s[0].exp_name],
                 )
                 print(f"    {t} is testing {s[0].exp_name} for {budget_per_round} seconds")
