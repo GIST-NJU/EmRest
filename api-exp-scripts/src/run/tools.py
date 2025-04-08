@@ -13,7 +13,10 @@ tools = [
     'restct',
     'miner',
     'evomaster',
-    'schemathesis'
+    'schemathesis',
+    'emrest-infer',
+    'emrest-random',
+    'emrest-noretry'
 ]
 
 TOOL_ROOT = Path(__file__).parents[3] / "api-tools"
@@ -33,7 +36,7 @@ def cli():
 
 @cli.command(name="run")
 @click.option('--tool', '-t', required=True,
-              type=click.Choice(['emrest', 'arat-rl', 'morest', 'restct', 'miner', 'evomaster', 'schemathesis']),
+              type=click.Choice(tools),
               help='the REST APIs testing tool to use')
 @click.option('--expName', '-e', required=False, help='the name of API under test')
 @click.option('--swaggerV2', '-s2', required=False, help='the swagger file of the API under test, in v2 format')
@@ -42,12 +45,12 @@ def cli():
 @click.option('--output', '-o', required=True, help='Output directory')
 @click.option('--serverUrl', required=True, help='the URL of the REST API Server, e.g., http://localhost:8080/api')
 @click.option('--authKey', '-ak', help='the key of the authorization header')
-@click.option('--authValue', '-av', help='the value of the authorization header')
-def run_cli(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey, authValue):
-    run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey, authValue)
+@click.option('--token', help='the token of gitlab')
+def run_cli(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey, token):
+    run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey, token)
 
 
-def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey=None, authValue=None):
+def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey=None, token=None):
     def validate():
         if not tool:
             raise Exception("Tool not specified")
@@ -57,7 +60,7 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
             raise Exception("Swagger file not specified, please specify swaggerV2 or swaggerV3")
         if not output:
             raise Exception("Output directory not specified (Output directory if any results are generated)")
-        if not serverUrl:
+        if tool == "miner" and not serverUrl:
             raise Exception("Server URL not specified (the URL of the REST API Server, e.g., http://localhost:8080/api)")
     
     def choose_swagger_version():
@@ -81,25 +84,31 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
         os.mkdir(output)
 
     if tool == 'emrest':
-        run_emrest(expName, swagger, budget, output, serverUrl, authKey, authValue)
+        run_original_emrest(expName, swagger, budget, output, serverUrl, authKey, token)
+    elif tool == 'emrest-infer':
+        run_emrest_infer(expName, swagger, budget, output, serverUrl, authKey, token)
+    elif tool == 'emrest-random':
+        run_emrest_random_op_selector(expName, swagger, budget, output, serverUrl, authKey, token)
+    elif tool == 'emrest-noretry':
+        run_emrest_no_retry(expName, swagger, budget, output, serverUrl, authKey, token)
     elif tool == 'arat-rl':
-        run_arat_rl(expName, swagger, budget, output, serverUrl, authValue)
+        run_arat_rl(expName, swagger, budget, output, serverUrl, token)
     elif tool == 'morest':
-        run_morest(expName, swagger, budget, output, serverUrl, authValue)
+        run_morest(expName, swagger, budget, output, serverUrl, token)
     elif tool == 'restct':
-        run_restct(expName, swagger, budget, output, serverUrl, authValue)
+        run_restct(expName, swagger, budget, output, serverUrl, token)
     elif tool == 'miner':
-        run_miner(expName, swagger, budget, output, authValue)
+        run_miner(expName, swagger, budget, output, token)
     elif tool == 'evomaster':
-        run_evomaster(expName, swagger, budget, output, serverUrl, authValue)
+        run_evomaster(expName, swagger, budget, output, serverUrl, token)
     elif tool == 'schemathesis':
-        run_schemathesis(expName, swagger, budget, output, serverUrl, authValue)
+        run_schemathesis(expName, swagger, budget, output, serverUrl, token)
     else:
         print("Unsupported tool: " + tool)
         return
 
 
-def run_emrest(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
+def _run_emrest(expName, swagger, budget, output, serverUrl, suffix='', authKey=None, token=None):
     """generate bash scripts for running emrest"""
     # enter the emrest folder to use poetry
     emrest_fold = Path(__file__).parents[3] / "EmRest"
@@ -119,11 +128,8 @@ def run_emrest(expName, swagger, budget, output, serverUrl, authKey=None, authVa
         print("PICT tool not found")
         return
 
-    # use swagger file name as exp_name
-    exp_name = os.path.basename(swagger).split('.')[0]
-
     args = {
-        "--exp_name": exp_name,
+        "--exp_name": expName,
         "--spec_file": swagger,
         "--budget": budget,
         "--output_path": output,
@@ -131,42 +137,56 @@ def run_emrest(expName, swagger, budget, output, serverUrl, authKey=None, authVa
         "--server": serverUrl
     }
 
-    if authKey is not None and authValue is not None:
+    if authKey is not None and token is not None:
         args["--authKey"] = authKey
-        args["--authValue"] = authValue
+        args["--authValue"] = f"Bearer {token}"
 
     # assemble the command
-    cmd = f"cd {emrest_fold} && poetry run python -m src/alg.py {' '.join([f'{k} {v}' for k, v in args.items()])}"
-
+    cmd = f"cd {emrest_fold} && poetry run python -m src/alg{suffix}.py {' '.join([f'{k} {v}' for k, v in args.items()])} > {output}/runtime.log 2>&1"
+    screened = f"screen -dmS emrest{suffix}_{expName} bash -c \"{cmd}\""
     # run the command
-    subprocess.run(cmd, shell=True)
-    print("EmRest is started")
+    subprocess.run(screened, shell=True)
 
+def run_original_emrest(expName, swagger, budget, output, serverUrl, authKey=None, token=None):
+    """Original EmRest"""
+    _run_emrest(expName, swagger, budget, output, serverUrl, suffix='', authKey=authKey, token=token)
 
-def run_arat_rl(expName, swagger, budget, output, serverUrl, authValue=None):
+def run_emrest_no_retry(expName, swagger, budget, output, serverUrl, authKey=None, token=None):
+    """Ablation study: EmRest_NoRetry"""
+    _run_emrest(expName, swagger, budget, output, serverUrl, suffix='_op_selector_without_retry', authKey=authKey, token=token)
+
+def run_emrest_infer(expName, swagger, budget, output, serverUrl, authKey=None, token=None):
+    """Ablation study: EmRest_Infer"""
+    _run_emrest(expName, swagger, budget, output, serverUrl, suffix='_without_mutation', authKey=authKey, token=token)
+
+def run_emrest_random_op_selector(expName, swagger, budget, output, serverUrl, authKey=None, token=None):
+    """Ablation study: EmRest_Random"""
+    _run_emrest(expName, swagger, budget, output, serverUrl, suffix='_with_random_op_selector', authKey=authKey, token=token)
+
+def run_arat_rl(expName, swagger, budget, output, serverUrl, token=None):
 
     main_py = os.path.join(TOOL_ROOT, "ARAT-RL", "main.py")
 
-    if authValue is None:
-        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
+    if token is None:
+        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/runtime.log 2>&1\""
     else:
-        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} {authValue} > {output}/log.log 2>&1\""
+        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} {token} > {output}/runtime.log 2>&1\""
 
     subprocess.run(run, shell=True)
 
 
-def run_morest(expName, swagger, budget, output, serverUrl, authValue=None):
+def run_morest(expName, swagger, budget, output, serverUrl, token=None):
     main_py = os.path.join(TOOL_ROOT, "morest", "fuzzer.py")
 
-    if authValue is None:
-        run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
+    if token is None:
+        run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/runtime.log 2>&1\""
     else:
-        run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} {authValue} > {output}/log.log 2>&1\""
+        run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} {token} > {output}/runtime.log 2>&1\""
 
     subprocess.run(run, shell=True)
 
 
-def run_restct(expName, swagger, budget, output, serverUrl, authValue=None):
+def run_restct(expName, swagger, budget, output, serverUrl, token=None):
     output_dir = os.path.join(output, "exp_out")
     os.makedirs(output_dir, exist_ok=True)
 
@@ -182,7 +202,7 @@ def run_restct(expName, swagger, budget, output, serverUrl, authValue=None):
         "--patterns": PATTERNS,
         "--jar": ACTS,
         "--budget": budget,
-        "--header": f"Authorization: Bearer {authValue}"
+        "--header": f"Authorization: Bearer {token}"
     }
     config_without_token = {
         "--server": serverUrl,
@@ -196,15 +216,15 @@ def run_restct(expName, swagger, budget, output, serverUrl, authValue=None):
     config_args = ' '.join([f'{k} {v}' for k, v in config_without_token.items() if v is not None])
     config_args_token = ' '.join([f'{k} {v}' for k, v in config_with_token.items() if v is not None])
 
-    if authValue is not None:
-        run = f"source activate restct && screen -dmS restct_{expName} bash -c \"python {main_py} {config_args_token} > {output}/log.log 2>&1\""
+    if token is not None:
+        run = f"source activate restct && screen -dmS restct_{expName} bash -c \"python {main_py} {config_args_token} > {output}/runtime.log 2>&1\""
     else:
-        run = f"source activate restct && screen -dmS restct_{expName} bash -c \"python {main_py}  {config_args} > {output}/log.log 2>&1\""
+        run = f"source activate restct && screen -dmS restct_{expName} bash -c \"python {main_py}  {config_args} > {output}/runtime.log 2>&1\""
 
     subprocess.run(run, shell=True)
 
 
-def run_miner(expName, swagger, budget, output, authValue=None):
+def run_miner(expName, swagger, budget, output, token=None):
     def write_token(destination, token):
         token_file = os.path.join(destination, "token.txt")
         token = """
@@ -237,15 +257,15 @@ Authorization: Bearer token
     compile = f"chmod 777 {miner_home} && {miner_home} compile --api_spec {swagger}"
     run_miner = f"{miner_home} fuzz --grammar_file ./Compile/grammar.py --dictionary_file ./Compile/dict.json --settings ./Compile/engine_settings.json --no_ssl --time_budget {budget / 3600} --disable_checkers payloadbody"
     run = f"chmod 777 {miner_home} && cd {destination} && source activate miner && screen -dmS miner_{expName} bash -c \"{run_miner}\""
-    if authValue is not None:
-        write_token(destination, authValue)
+    if token is not None:
+        write_token(destination, token)
     subprocess.run(f"rm -rf {destination}", shell=True)
     subprocess.run(mkdir + f" && cd {destination} && {compile}", shell=True)
 
     subprocess.run(f"cd {destination} && {run}", shell=True)
 
 
-def run_evomaster(expName, swagger, budget, output, serverUrl, authValue=None):
+def run_evomaster(expName, swagger, budget, output, serverUrl, token=None):
 
     evo_home = os.path.join(TOOL_ROOT, "evomaster.jar")
 
@@ -253,20 +273,20 @@ def run_evomaster(expName, swagger, budget, output, serverUrl, authValue=None):
 
     run_evo = f". {JDK_8} && java -jar {evo_home} --blackBox true --bbSwaggerUrl file://{swagger} --bbTargetUrl {serverUrl} --outputFormat JAVA_JUNIT_4 --maxTime {time_limit} --outputFolder {output}"
 
-    if authValue is not None:
-        run_evo += f" --header0 'Authorization: Bearer {authValue}'"
-    run = f"screen -dmS evomaster_{expName} bash -c \"{run_evo} > {output}/log.log 2>&1\""
+    if token is not None:
+        run_evo += f" --header0 'Authorization: Bearer {token}'"
+    run = f"screen -dmS evomaster_{expName} bash -c \"{run_evo} > {output}/runtime.log 2>&1\""
 
     subprocess.run(run, shell=True)
 
 
-def run_schemathesis(expName, swagger, budget, output, serverUrl, authValue=None):
+def run_schemathesis(expName, swagger, budget, output, serverUrl, token=None):
     cli_file = os.path.join(TOOL_ROOT, "Schemathesis", "schemathesis_cli.py")
 
-    if authValue is None:
-        run = f"source activate schemathesis && screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
+    if token is None:
+        run = f"source activate schemathesis && screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} > {output}/runtime.log 2>&1\""
     else:
-        run = f"source activate schemathesis && screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} {authValue} > {output}/log.log 2>&1\""
+        run = f"source activate schemathesis && screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} {token} > {output}/runtime.log 2>&1\""
 
     # print(run)
     subprocess.run(run, shell=True)

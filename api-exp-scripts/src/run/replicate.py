@@ -15,6 +15,36 @@ def clean_all():
     subprocess.run("docker stop $(docker ps -q)", shell=True)
     subprocess.run("docker rm $(docker ps -aq)", shell=True)
 
+def rq1_and_rq2():
+    selected_tools = [t for t in tools if t not in ['emrest-random', 'emrest-noretry']]
+    run_tools_on_emb_services(
+        used_tools=selected_tools, 
+        used_services=emb_services, 
+        repeats=30, 
+        budget_per_round=3600, 
+        result_dir='./rq1_emb')
+    run_tools_on_gitlab_services(
+        used_tools=selected_tools, 
+        used_services=gitlab_services, 
+        repeats=30, 
+        budget_per_round=3600, 
+        result_dir='./rq1_gitlab')
+
+def rq3():
+    selected_tools = ['emrest', 'emrest-random', 'emrest-noretry']
+    run_tools_on_emb_services(
+        used_tools=selected_tools, 
+        used_services=emb_services, 
+        repeats=30, 
+        budget_per_round=3600, 
+        result_dir='./rq3_emb')
+    run_tools_on_gitlab_services(
+        used_tools=selected_tools, 
+        used_services=gitlab_services, 
+        repeats=30,
+        budget_per_round=3600,
+        result_dir='./rq3_gitlab')
+    
 
 def run_tools_on_emb_services(used_tools: list[str], used_services: list[Service], repeats: int, budget_per_round: int,
                               result_dir):
