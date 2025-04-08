@@ -7,7 +7,7 @@ import os
 
 def cli():
     start_time = time.time()
-    run = f"schemathesis run {spec_file} --base-url {base_url} --stateful=links --request-timeout 5000 --validate-schema False"
+    run = f"source activate schemathesis && schemathesis run {spec_file} --base-url {base_url} --stateful=links --request-timeout 5000 --validate-schema False"
 
     if token is not None:
         run += f"-H \"Authorization: Bearer {token}\""

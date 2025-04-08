@@ -139,18 +139,18 @@ def run_emrest(expName, swagger, budget, output, serverUrl, authKey=None, authVa
 
 def run_arat_rl(expName, swagger, budget, output, serverUrl, authValue=None):
 
-    main_py = os.path.join(f"{TOOL_ROOT}/ARAT-RL", "main.py")
+    main_py = os.path.join(TOOL_ROOT, "ARAT-RL", "main.py")
 
     if authValue is None:
-        run = f"source activate arat-rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
+        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
     else:
-        run = f"source activate arat-rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} {authValue} > {output}/log.log 2>&1\""
+        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} {authValue} > {output}/log.log 2>&1\""
 
     subprocess.run(run, shell=True)
 
 
 def run_morest(expName, swagger, budget, output, serverUrl, authValue=None):
-    main_py = os.path.join(f"{TOOL_ROOT}/morest", "fuzzer.py")
+    main_py = os.path.join(TOOL_ROOT, "morest", "fuzzer.py")
 
     if authValue is None:
         run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
@@ -161,13 +161,13 @@ def run_morest(expName, swagger, budget, output, serverUrl, authValue=None):
 
 
 def run_restct(expName, swagger, budget, output, serverUrl, authValue=None):
-    output_dir = os.path.join(output, f"exp_out")
+    output_dir = os.path.join(output, "exp_out")
     os.makedirs(output_dir, exist_ok=True)
 
-    main_py = os.path.join(f"{TOOL_ROOT}/RestCT", "src/app.py")
+    main_py = os.path.join(TOOL_ROOT, "RestCT", "src", "app.py")
 
-    ACTS = os.path.join(f"{TOOL_ROOT}/RestCT", "lib/acts_2.93.jar")
-    PATTERNS = os.path.join(f"{TOOL_ROOT}/RestCT", "lib/matchrules.json")
+    ACTS = os.path.join(TOOL_ROOT, "RestCT", "lib", "acts_2.93.jar")
+    PATTERNS = os.path.join(TOOL_ROOT, "RestCT", "lib", "matchrules.json")
 
     config_with_token = {
         "--server": serverUrl,
@@ -207,7 +207,7 @@ Authorization: Bearer token
 """.replace("token", token)
         with open(token_file, "w") as f:
             f.write(token)
-        setting_file = os.path.join(destination, "Compile/engine_settings.json")
+        setting_file = os.path.join(destination, "Compile", "engine_settings.json")
         with open(setting_file, "r") as f:
             settings = json.load(f)
         token_setting = {
@@ -226,7 +226,7 @@ Authorization: Bearer token
     destination = os.path.join(output, "out")
     os.makedirs(destination, exist_ok=True)
 
-    miner_home = os.path.join(f"{TOOL_ROOT}/MINER", "restler_bin_atten/restler/Restler")
+    miner_home = os.path.join(TOOL_ROOT, "MINER", "restler_bin_atten", "restler", "Restler")
     mkdir = f"mkdir {destination}"
     compile = f"chmod 777 {miner_home} && {miner_home} compile --api_spec {swagger}"
     run_miner = f"{miner_home} fuzz --grammar_file ./Compile/grammar.py --dictionary_file ./Compile/dict.json --settings ./Compile/engine_settings.json --no_ssl --time_budget {budget / 3600} --disable_checkers payloadbody"
@@ -255,12 +255,12 @@ def run_evomaster(expName, swagger, budget, output, serverUrl, authValue=None):
 
 
 def run_schemathesis(expName, swagger, budget, output, serverUrl, authValue=None):
-    cli_file = os.path.join(TOOL_ROOT, "schemathesis_cli.py")
+    cli_file = os.path.join(TOOL_ROOT, "Schemathesis", "schemathesis_cli.py")
 
     if authValue is None:
-        run = f"screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
+        run = f"source activate schemathesis && screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
     else:
-        run = f"screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} {authValue} > {output}/log.log 2>&1\""
+        run = f"source activate schemathesis && screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} {authValue} > {output}/log.log 2>&1\""
 
     # print(run)
     subprocess.run(run, shell=True)
@@ -268,7 +268,6 @@ def run_schemathesis(expName, swagger, budget, output, serverUrl, authValue=None
 def is_ready():
     """
     check conda command is availabel, conda environment is created: restct, rl, morest, schemathesis
-    each conda environment has the required packages
     """
     success = True
 
