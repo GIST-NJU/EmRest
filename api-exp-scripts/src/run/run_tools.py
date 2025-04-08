@@ -1,6 +1,7 @@
 import click
 import os
 import subprocess
+import shutil
 import json
 import platform
 from pathlib import Path
@@ -263,6 +264,63 @@ def run_schemathesis(expName, swagger, budget, output, serverUrl, authValue=None
 
     # print(run)
     subprocess.run(run, shell=True)
+
+def is_ready():
+    """
+    check conda command is availabel, conda environment is created: restct, rl, morest, schemathesis
+    each conda environment has the required packages
+    """
+    success = True
+
+    # Check conda command
+    if shutil.which("conda"):
+        print("[ OK ] Conda command is available.")
+    else:
+        print("[FAIL] Conda command is not found. Please install Anaconda or Miniconda.")
+        return False  
+
+    # List of required conda environments and their essential packages
+    conda_envs = {"RestCT": "restct", "ARAT-RL": "rl", "Morest": "morest", "Schemathesis": "schemathesis"}
+
+    # Get existing conda environments
+    try:
+        env_list_output = subprocess.check_output(["conda", "env", "list"], text=True)
+    except subprocess.CalledProcessError as e:
+        print(f"[FAIL] Error executing conda command: {e}")
+        return False
+
+    print("Checking conda environments for tools: RestCT, ARAT-RL, Morest, Schemathesis")
+    for tool, env_name in conda_envs.items():
+        if env_name in env_list_output:
+            print(f"    [ OK ] Conda environment for '{tool}' exists: '{env_name}'")
+            # Check required packages inside the environment
+        else:
+            print(f"    [FAIL] Conda environment for '{tool}' does not exist: '{env_name}'")
+            success = False
+
+    print("Checking Java 1.8 for tool: EvoMaster")
+    cmd = f'bash -c ". {JDK_8} && java -version"'
+    try:
+        # java -version 输出到 stderr
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True, text=True)
+        if f'version 1.8' in output:
+            print(f"    [ OK ] Java 1.8 correctly set by {JDK_8}")
+        else:
+            print(f"    [FAIL] Java 1.8 NOT correctly set by {JDK_8}")
+            print(f"           Actual output: {output.strip().splitlines()[0]}")
+            success = False
+
+    except subprocess.CalledProcessError as e:
+        print(f"    [FAIL] Error running java after sourcing {JDK_8}: {e.output}")
+        success = False
+
+    if success:
+        print("[ OK ] All tools are ready.")
+    else:
+        print("[FAIL] Some tools are not ready. Please check the above errors.")
+
+    return success
+
 
 
 if __name__ == "__main__":

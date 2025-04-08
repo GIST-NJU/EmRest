@@ -411,7 +411,7 @@ def cli(sut, port, output_dir, disable_mitmproxy, disable_jacoco):
     click.echo(f"JaCoCo coverage is {'enabled' if use_jacoco else 'disabled'}.")
 
 
-def isReady():
+def is_ready():
     """
     Check if the system meets all prerequisites:
     Linux OS, screen, Java, API jars, JaCoCo agent, Docker, mitmproxy.
@@ -525,5 +525,4 @@ def isReady():
 
 
 if __name__ == "__main__":
-    # cli()
-    isReady()
+    cli()
