@@ -33,7 +33,7 @@
 - [☑️] 优化```run_tools.py```中main函数逻辑，ARAT-RL的```main.py```添加time_budget支持，修改```run_tools.py```的arat-rl命令支持budget
 - [☑️] 修改```run_tools.py```的evomaster命令，时间由原本的固定一小时改为支持budget，用s作为单位，具体使用参考https://github.com/WebFuzzing/EvoMaster/blob/master/docs/options.md
 - [☑️] 完成```run_tools.py```的morest命令，修改morest的主文件fuzzer.py，添加timebudget支持
-
+- [☑️] 完成```run_tools.py```的miner命令,支持budget，使用小时数，用budget/3600赋值
 
 **EmRest** is a black-box testing tool that leverages error message analysis to enhance the generation of both valid and exceptional test inputs for REST APIs.  
 EmRest has been accepted at **ISSTA 2025**. This repository contains its implementation, benchmarks, baselines, and experiment scripts.

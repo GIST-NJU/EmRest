@@ -59,7 +59,7 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
     elif tool.lower() == 'restct':
         run_restct(swagger, budget, output, port, authKey, authValue)
     elif tool.lower() == 'miner':
-        run_miner(swagger, budget, output, port, authKey, authValue)
+        run_miner(expName, swagger, budget, output, serverUrl, authKey, authValue)
     elif tool.lower() == 'evomaster':
         run_evomaster(expName, swagger, budget, output, serverUrl, authKey, authValue)
     elif tool.lower() == 'schemathesis':
@@ -142,16 +142,52 @@ def run_restct(swagger, budget, output, server, authKey=None, authValue=None):
     pass
 
 
-def run_miner(swagger, budget, output, server, authKey=None, authValue=None):
-    # TODO: implement this
-    pass
+def run_miner(expName, swagger, budget, output, server, authKey=None, authValue=None):
+    def write_token(destination, token):
+        token_file = os.path.join(destination, "token.txt")
+        token = """
+{u'api': {}}
+Authorization: Bearer token
+""".replace("token", token)
+        with open(token_file, "w") as f:
+            f.write(token)
+        setting_file = os.path.join(destination, "Compile/engine_settings.json")
+        with open(setting_file, "r") as f:
+            settings = json.load(f)
+        token_setting = {
+            "authentication": {
+                "token":
+                    {
+                        "location": token_file,
+                        "token_refresh_interval": 300
+                    }
+            }
+        }
+        settings.update(token_setting)
+        with open(setting_file, "w") as f:
+            json.dump(settings, f, indent=2)
+
+    destination = os.path.join(output, "out")
+    os.makedirs(destination, exist_ok=True)
+
+    miner_home = os.path.join(f"{TOOL_FOLD}/MINER", "restler_bin_atten/restler/Restler")
+    mkdir = f"mkdir {destination}"
+    compile = f"chmod 777 {miner_home} && {miner_home} compile --api_spec {swagger}"
+    run_miner = f"{miner_home} fuzz --grammar_file ./Compile/grammar.py --dictionary_file ./Compile/dict.json --settings ./Compile/engine_settings.json --no_ssl --time_budget {budget / 3600} --disable_checkers payloadbody"
+    run = f"chmod 777 {miner_home} && cd {destination} && source activate miner && screen -dmS miner_{expName} bash -c \"{run_miner}\""
+    if authValue is not None:
+        write_token(destination, authValue)
+    subprocess.run(f"rm -rf {destination}", shell=True)
+    subprocess.run(mkdir + f" && cd {destination} && {compile}", shell=True)
+
+    subprocess.run(f"cd {destination} && {run}", shell=True)
 
 
 def run_evomaster(expName, swagger, budget, output, server, authKey=None, authValue=None):
 
     evo_home = os.path.join(TOOL_FOLD, "evomaster.jar")
 
-    time_limit = str(budget)+"s"
+    time_limit = str(budget) + "s"
 
     java_8 = Path(__file__).parents[3] / "api-suts/java8.env"
 
