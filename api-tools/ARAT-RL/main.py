@@ -665,7 +665,7 @@ def main():
     alpha, gamma, q_table = initialize_q_learning(operations, parameters_frequency)
 
     start_time = time.time()
-    time_limit = 3600
+    time_limit = time_budget
     iteration = 0
     max_iterations_without_improvement = 10
 
@@ -713,8 +713,9 @@ def main():
 
 if __name__ == "__main__":
     base_url = sys.argv[2]
-    if len(sys.argv) > 3:
-        token = sys.argv[3]
+    time_budget = int(sys.argv[3])
+    if len(sys.argv) > 4:
+        token = sys.argv[4]
     else:
         token = None
     EPSILON = [0.1]

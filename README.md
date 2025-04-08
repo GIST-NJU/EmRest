@@ -28,6 +28,10 @@
 - [☑️] 修改```replicate.py```中sut的tuple形式，将Service添加其中
 - [☑️] 修改```run_tools.py```的参数sut为expName，将post改为server，并在```replicate.py```中添加根据service添加server
 - [☑️] fixbug: 修改```services.py```的gitlab service的server_url
+
+### 4月8日
+- [☑️] 优化```run_tools.py```中main函数逻辑，ARAT-RL的```main.py```添加time_budget支持，修改```run_tools.py```的arat-rl命令支持budget
+
 **EmRest** is a black-box testing tool that leverages error message analysis to enhance the generation of both valid and exceptional test inputs for REST APIs.  
 EmRest has been accepted at **ISSTA 2025**. This repository contains its implementation, benchmarks, baselines, and experiment scripts.
 

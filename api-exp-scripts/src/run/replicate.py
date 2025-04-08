@@ -162,13 +162,22 @@ if __name__ == '__main__':
         # "gitlab-repository",
     ]
 
-    services_to_run = []
+    emb_services_to_run = []
+    gitlab_services_to_run = []
 
-    for service_name in emb_service_name + gitlab_service_name:
-        sut = next((s for s in emb_services + gitlab_services if s.exp_name == service_name), None)
+    for service_name in emb_service_name:
+        sut = next((s for s in emb_services if s.exp_name == service_name), None)
         if sut is None:
             continue
-        services_to_run.append(sut)
+        emb_services_to_run.append(sut)
 
-    run_tools_on_emb_services(tools, services_to_run, 1, 3600, "/root/nra/opensource/output/emb")
-    # run_tools_on_gitlab_services(tools, services_to_run, 1, 3600, "/root/nra/opensource/output_gitlab")
+    for service_name in gitlab_service_name:
+        sut = next((s for s in gitlab_services if s.exp_name == service_name), None)
+        if sut is None:
+            continue
+        gitlab_services_to_run.append(sut)
+
+    if len(emb_services_to_run) > 0:
+        run_tools_on_emb_services(tools, emb_services_to_run, 1, 3600, "/root/nra/opensource/output_emb")
+    if len(gitlab_services_to_run) > 0:
+        run_tools_on_gitlab_services(tools, gitlab_services_to_run, 1, 600, "/root/nra/opensource/output_gitlab")
