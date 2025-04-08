@@ -55,7 +55,7 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
     elif tool.lower() == 'arat-rl':
         run_arat_rl(expName, swagger, budget, output, serverUrl, authKey, authValue)
     elif tool.lower() == 'morest':
-        run_morest(swagger, budget, output, port, authKey, authValue)
+        run_morest(expName, swagger, budget, output, serverUrl, authKey, authValue)
     elif tool.lower() == 'restct':
         run_restct(swagger, budget, output, port, authKey, authValue)
     elif tool.lower() == 'miner':
@@ -126,9 +126,15 @@ def run_arat_rl(expName, swagger, budget, output, server, authKey=None, authValu
     subprocess.run(run, shell=True)
 
 
-def run_morest(swagger, budget, output, server, authKey=None, authValue=None):
-    # TODO: implement this
-    pass
+def run_morest(expName, swagger, budget, output, server, authKey=None, authValue=None):
+    main_py = os.path.join(f"{TOOL_FOLD}/morest", "fuzzer.py")
+
+    if authValue is None:
+        run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {server} {budget} > {output}/log.log 2>&1\""
+    else:
+        run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {server} {budget} {authValue} > {output}/log.log 2>&1\""
+
+    subprocess.run(run, shell=True)
 
 
 def run_restct(swagger, budget, output, server, authKey=None, authValue=None):
