@@ -13,6 +13,8 @@ Gradle
 - 配置文件requirements.txt可用，直接pip install -r requirements.txt即可
 
 ## MoRest
+- Python版本 ==3.7
+- 配置文件requirements.txt可用，直接pip install -r requirements.txt即可
 
 ## RestCT
 
