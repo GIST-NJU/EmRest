@@ -386,13 +386,21 @@ def find_service_by_name(name: str) -> Service:
     available_services = [service.exp_name for service in emb_services + gitlab_services]
     raise ValueError(f"Service '{name}' not found. Available services: {available_services}")
 
-@click.command()
+@click.group()
+def cli():
+    """
+    A multi-command CLI tool using Click.
+    Use `run --help` or `check --help` to see each subcommand's usage.
+    """
+    pass
+
+@cli.command(name="run")
 @click.option('--sut', type=str, required=True, help='Name of the service under test (SUT).')
 @click.option('--port', type=int, required=True, help='Port number on which the SUT will run.')
 @click.option('--output-dir', type=str, required=True, help='Directory to store the output results.')
 @click.option('--disable-mitmproxy', is_flag=True, default=False, help='Disable the use of mitmproxy.')
 @click.option('--disable-jacoco', is_flag=True, default=False, help='Disable the use of JaCoCo coverage.')
-def cli(sut, port, output_dir, disable_mitmproxy, disable_jacoco):
+def run_cli(sut, port, output_dir, disable_mitmproxy, disable_jacoco):
     """
     CLI to run a service under test (SUT) with optional mitmproxy and JaCoCo.
     """
@@ -411,6 +419,7 @@ def cli(sut, port, output_dir, disable_mitmproxy, disable_jacoco):
     click.echo(f"JaCoCo coverage is {'enabled' if use_jacoco else 'disabled'}.")
 
 
+@cli.command(name="check")
 def is_ready():
     """
     Check if the system meets all prerequisites:

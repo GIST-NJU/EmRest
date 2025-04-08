@@ -23,7 +23,15 @@ JDK_11 = os.path.join(API_ROOT, "java11.env")
 JDK_17 = os.path.join(API_ROOT, "java17.env")
 
 
-@click.command()
+@click.group()
+def cli():
+    """
+    A multi-command CLI tool using Click.
+    Use `run --help` or `check --help` to see each subcommand's usage.
+    """
+    pass
+
+@cli.command(name="run")
 @click.option('--tool', '-t', required=True,
               type=click.Choice(['emrest', 'arat-rl', 'morest', 'restct', 'miner', 'evomaster', 'schemathesis']),
               help='the REST APIs testing tool to use')
@@ -35,7 +43,7 @@ JDK_17 = os.path.join(API_ROOT, "java17.env")
 @click.option('--serverUrl', required=True, help='the URL of the REST API Server, e.g., http://localhost:8080/api')
 @click.option('--authKey', '-ak', help='the key of the authorization header')
 @click.option('--authValue', '-av', help='the value of the authorization header')
-def cli(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey, authValue):
+def run_cli(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey, authValue):
     run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey, authValue)
 
 
@@ -103,8 +111,6 @@ def run_emrest(expName, swagger, budget, output, serverUrl, authKey=None, authVa
     system = platform.system()
     if system == 'Linux':
         pict = 'pict-linux'
-    elif system == 'Darwin':
-        pict = 'pict-mac'
     else:
         raise Exception("Unsupported OS for running PICT. Experiment Replication only supports Linux")
 
@@ -265,9 +271,10 @@ def run_schemathesis(expName, swagger, budget, output, serverUrl, authValue=None
     # print(run)
     subprocess.run(run, shell=True)
 
+@cli.command(name="check")
 def is_ready():
     """
-    check conda command is availabel, conda environment is created: restct, rl, morest, schemathesis
+    check conda command is availabel, conda environment is created: restct, rl, morest, schemathesis, miner
     """
     success = True
 
@@ -302,7 +309,7 @@ def is_ready():
     try:
         # java -version 输出到 stderr
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True, text=True)
-        if f'version "1.8' in output:
+        if 'version "1.8' in output:
             print(f"    [ OK ] Java 1.8 correctly set by {JDK_8}")
         else:
             print(f"    [FAIL] Java 1.8 NOT correctly set by {JDK_8}")
