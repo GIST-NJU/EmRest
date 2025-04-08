@@ -302,7 +302,7 @@ def is_ready():
     try:
         # java -version 输出到 stderr
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True, text=True)
-        if f'version 1.8' in output:
+        if f'version "1.8' in output:
             print(f"    [ OK ] Java 1.8 correctly set by {JDK_8}")
         else:
             print(f"    [FAIL] Java 1.8 NOT correctly set by {JDK_8}")
