@@ -16,6 +16,16 @@ Gradle
 
 ## RestCT
 
+## Miner
+- Python版本 == 3.9
+- 配置文件requirements.txt可用，直接pip install -r requirements.txt即可
+
+## EvoMaster
+- Java 8
+
+## Schemathesis
+pip install schemathesis即可
+
 ## 打包SUT
 ```bash
 cd api-suts

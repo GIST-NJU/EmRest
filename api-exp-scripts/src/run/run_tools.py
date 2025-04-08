@@ -139,9 +139,9 @@ def run_arat_rl(expName, swagger, budget, output, serverUrl, authValue=None):
     main_py = os.path.join(f"{TOOL_ROOT}/ARAT-RL", "main.py")
 
     if authValue is None:
-        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
+        run = f"source activate arat-rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
     else:
-        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} {authValue} > {output}/log.log 2>&1\""
+        run = f"source activate arat-rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} {authValue} > {output}/log.log 2>&1\""
 
     subprocess.run(run, shell=True)
 
