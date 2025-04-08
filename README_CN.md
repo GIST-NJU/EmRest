@@ -17,6 +17,9 @@ Gradle
 - 配置文件requirements.txt可用，直接pip install -r requirements.txt即可
 
 ## RestCT
+- Python版本 ==3.11
+- 配置文件requirements.txt可用，直接pip install -r requirements.txt即可
+- pip安装完成之后需要安装spacy的模型，en_core_web_sm
 
 ## Miner
 - Python版本 == 3.9
@@ -26,7 +29,8 @@ Gradle
 - Java 8
 
 ## Schemathesis
-pip install schemathesis即可
+- Python版本 == 3.11
+- pip install schemathesis即可
 
 ## 打包SUT
 ```bash
