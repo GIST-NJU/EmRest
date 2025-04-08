@@ -465,12 +465,13 @@ def isReady():
     success &= check_java_version(JDK_17, '17')
 
     # 检查 API jar
+    print("Checking API jars...")
     for service in emb_services:
         jar_path = os.path.join(API_SUTS_FOLD, service.run_jar)
         if os.path.exists(jar_path):
-            print(f"[ OK ] API jar '{jar_path}' found")
+            print(f"    [ OK ] API jar '{jar_path}' found")
         else:
-            print(f"[FAIL] API jar '{jar_path}' is missing")
+            print(f"    [FAIL] API jar '{jar_path}' is missing")
             success = False
 
 
