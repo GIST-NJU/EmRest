@@ -103,7 +103,7 @@ def run_emrest(expName, swagger, budget, output, serverUrl, authKey=None, authVa
     elif Path('/usr/bin/brew').exists():
         pict = 'pict-mac'
     else:
-        print("Unsupported system")
+        print("PICT ")
         return
     pict = os.path.join(emrest_fold, 'lib', pict)
     if not os.path.exists(pict):
@@ -242,7 +242,7 @@ def run_evomaster(expName, swagger, budget, output, serverUrl, authKey=None, aut
 
     time_limit = str(budget) + "s"
 
-    run_evo = f". {JDK_8} && java -jar {evo_home} --blackBox true --bbSwaggerUrl file://{swagger} --bbTargetUrl {server} --outputFormat JAVA_JUNIT_4 --maxTime {time_limit} --outputFolder {output}"
+    run_evo = f". {JDK_8} && java -jar {evo_home} --blackBox true --bbSwaggerUrl file://{swagger} --bbTargetUrl {serverUrl} --outputFormat JAVA_JUNIT_4 --maxTime {time_limit} --outputFolder {output}"
 
     if authValue is not None:
         run_evo += f" --header0 'Authorization: Bearer {authValue}'"
