@@ -426,7 +426,7 @@ def isReady():
         print("[FAIL] Experiment replication only supports Linux (detected: {})".format(platform.system()))
         success = False
 
-    # 检查 screen
+    # check screen
     if shutil.which('screen'):
         print("[ OK ] 'screen' command is available")
     else:
@@ -456,7 +456,7 @@ def isReady():
         except subprocess.CalledProcessError as e:
             print(f"[FAIL] Error running java after sourcing {env_file}: {e.output}")
             return False
-    # 检查 Java (JDK)
+    # check Java (JDK)
     JDK_8 = os.path.join(API_SUTS_FOLD, 'java8.env')
     JDK_11 = os.path.join(API_SUTS_FOLD, 'java11.env')
     JDK_17 = os.path.join(API_SUTS_FOLD, 'java17.env')
@@ -464,44 +464,58 @@ def isReady():
     success &= check_java_version(JDK_11, '11')
     success &= check_java_version(JDK_17, '17')
 
-    # 检查 API jar
-    print("Checking API jars...")
-    for service in emb_services:
-        jar_path = os.path.join(API_SUTS_FOLD, service.run_jar)
-        if os.path.exists(jar_path):
-            print(f"    [ OK ] API jar '{jar_path}' found")
-        else:
-            print(f"    [FAIL] API jar '{jar_path}' is missing")
-            success = False
-
-
-    # 检查 JaCoCo agent
+    # check JaCoCo agent
     jacoco_agent = os.path.join(API_SUTS_FOLD, 'jacoco', 'jacocoagent.jar')
-    if os.path.exist(jacoco_agent):
+    if os.path.exists(jacoco_agent):
         print(f"[ OK ] JaCoCo agent '{jacoco_agent}' found")
     else:
         print(f"[FAIL] JaCoCo agent '{jacoco_agent}' is missing")
         success = False
     jacoco_cli = os.path.join(API_SUTS_FOLD, 'jacoco', 'jacococli.jar')
-    if os.path.exist(jacoco_cli):
+    if os.path.exists(jacoco_cli):
         print(f"[ OK ] JaCoCo CLI '{jacoco_cli}' found")
     else:
         print(f"[FAIL] JaCoCo CLI '{jacoco_cli}' is missing")
         success = False
 
-    # 检查 Docker
+    # check Docker
     if shutil.which('docker'):
         print("[ OK ] Docker is installed")
     else:
         print("[FAIL] Docker is not installed or not in PATH")
         success = False
 
-    # 检查 mitmproxy
+    # check maven
+    if shutil.which('mvn'):
+        print("[ OK ] Maven is installed")
+    else:
+        print("[FAIL] Maven is not installed or not in PATH")
+        success = False
+    
+    # check gradle
+    if shutil.which('gradle'):
+        print("[ OK ] Gradle is installed")
+    else:
+        print("[FAIL] Gradle is not installed or not in PATH")
+        success = False
+
+    # check mitmproxy
     if shutil.which('mitmproxy'):
         print("[ OK ] mitmproxy is installed")
     else:
         print("[FAIL] mitmproxy is not installed or not in PATH. mitmproxy is required to capture and analyze HTTP requests during the experiment.")
         success = False
+
+      # check API jar
+    print("Checking API jars...")
+    for service in emb_services:
+        jar_path = os.path.join(API_SUTS_FOLD, service.run_jar)
+        if os.path.exists(jar_path):
+            print(f"    [ OK ] {service.exp_name}: API jar '{jar_path}' found")
+        else:
+            print(f"    [FAIL] {service.exp_name}: API jar '{jar_path}' is missing")
+            success = False
+
 
     if success:
         print("[ OK ] All prerequisites are met")
@@ -511,4 +525,5 @@ def isReady():
 
 
 if __name__ == "__main__":
-    cli()
+    # cli()
+    isReady()
