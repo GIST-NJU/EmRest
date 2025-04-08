@@ -2,6 +2,7 @@ import click
 import os
 import subprocess
 import json
+import platform
 from pathlib import Path
 
 tools = [
@@ -98,13 +99,14 @@ def run_emrest(expName, swagger, budget, output, serverUrl, authKey=None, authVa
         return
 
     # choose the right PICT tool based on the system architecture
-    if Path('/usr/bin/dpkg').exists():
+    system = platform.system()
+    if system == 'Linux':
         pict = 'pict-linux'
-    elif Path('/usr/bin/brew').exists():
+    elif system == 'Darwin':
         pict = 'pict-mac'
     else:
-        print("PICT ")
-        return
+        raise Exception("Unsupported OS for running PICT. Experiment Replication only supports Linux")
+
     pict = os.path.join(emrest_fold, 'lib', pict)
     if not os.path.exists(pict):
         print("PICT tool not found")
