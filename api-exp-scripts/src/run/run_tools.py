@@ -142,11 +142,14 @@ def run_miner(swagger, budget, output, server, authKey=None, authValue=None):
 
 
 def run_evomaster(expName, swagger, budget, output, server, authKey=None, authValue=None):
+
     evo_home = os.path.join(TOOL_FOLD, "evomaster.jar")
+
+    time_limit = str(budget)+"s"
 
     java_8 = Path(__file__).parents[3] / "api-suts/java8.env"
 
-    run_evo = f". {java_8} && java -jar {evo_home} --blackBox true --bbSwaggerUrl file://{swagger} --bbTargetUrl {server} --outputFormat JAVA_JUNIT_4 --maxTime 1h --outputFolder {output}"
+    run_evo = f". {java_8} && java -jar {evo_home} --blackBox true --bbSwaggerUrl file://{swagger} --bbTargetUrl {server} --outputFormat JAVA_JUNIT_4 --maxTime {time_limit} --outputFolder {output}"
     if authValue is not None:
         run_evo += f" --header0 'Authorization: Bearer {authValue}'"
     run = f"screen -dmS evomaster_{expName} bash -c \"{run_evo} > {output}/log.log 2>&1\""
