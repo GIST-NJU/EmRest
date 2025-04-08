@@ -46,7 +46,7 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
         if not swaggerV2 and not swaggerV3:
             raise Exception("Swagger file not specified, please specify swaggerV2 or swaggerV3")
         if not output:
-            raise Exception("Output directory not specified (Output directory if any results are generated)")")
+            raise Exception("Output directory not specified (Output directory if any results are generated)")
         if not serverUrl:
             raise Exception("Server URL not specified (the URL of the REST API Server, e.g., http://localhost:8080/api)")
     
@@ -70,19 +70,19 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
     if not output.exists():
         os.mkdir(output)
 
-    if tool.lower() == 'emrest':
+    if tool == 'emrest':
         run_emrest(expName, swagger, budget, output, serverUrl, authKey, authValue)
-    elif tool.lower() == 'arat-rl':
+    elif tool == 'arat-rl':
         run_arat_rl(expName, swagger, budget, output, serverUrl, authKey, authValue)
-    elif tool.lower() == 'morest':
+    elif tool == 'morest':
         run_morest(expName, swagger, budget, output, serverUrl, authKey, authValue)
-    elif tool.lower() == 'restct':
+    elif tool == 'restct':
         run_restct(expName, swagger, budget, output, serverUrl, authKey, authValue)
-    elif tool.lower() == 'miner':
+    elif tool == 'miner':
         run_miner(expName, swagger, budget, output, serverUrl, authKey, authValue)
-    elif tool.lower() == 'evomaster':
+    elif tool == 'evomaster':
         run_evomaster(expName, swagger, budget, output, serverUrl, authKey, authValue)
-    elif tool.lower() == 'schemathesis':
+    elif tool == 'schemathesis':
         run_schemathesis(expName, swagger, budget, output, serverUrl, authKey, authValue)
     else:
         print("Unsupported tool: " + tool)
@@ -136,7 +136,7 @@ def run_emrest(expName, swagger, budget, output, server, authKey=None, authValue
 
 def run_arat_rl(expName, swagger, budget, output, server, authKey=None, authValue=None):
 
-    main_py = os.path.join(f"{TOOL_FOLD}/ARAT-RL", "main.py")
+    main_py = os.path.join(f"{TOOL_ROOT}/ARAT-RL", "main.py")
 
     if authValue is None:
         run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {server} {budget} > {output}/log.log 2>&1\""
@@ -147,7 +147,7 @@ def run_arat_rl(expName, swagger, budget, output, server, authKey=None, authValu
 
 
 def run_morest(expName, swagger, budget, output, server, authKey=None, authValue=None):
-    main_py = os.path.join(f"{TOOL_FOLD}/morest", "fuzzer.py")
+    main_py = os.path.join(f"{TOOL_ROOT}/morest", "fuzzer.py")
 
     if authValue is None:
         run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {server} {budget} > {output}/log.log 2>&1\""
@@ -161,10 +161,10 @@ def run_restct(expName, swagger, budget, output, server, authKey=None, authValue
     output_dir = os.path.join(output, f"exp_out")
     os.makedirs(output_dir, exist_ok=True)
 
-    main_py = os.path.join(f"{TOOL_FOLD}/RestCT", "src/app.py")
+    main_py = os.path.join(f"{TOOL_ROOT}/RestCT", "src/app.py")
 
-    ACTS = os.path.join(f"{TOOL_FOLD}/RestCT", "lib/acts_2.93.jar")
-    PATTERNS = os.path.join(f"{TOOL_FOLD}/RestCT", "lib/matchrules.json")
+    ACTS = os.path.join(f"{TOOL_ROOT}/RestCT", "lib/acts_2.93.jar")
+    PATTERNS = os.path.join(f"{TOOL_ROOT}/RestCT", "lib/matchrules.json")
 
     config_with_token = {
         "--server": server,
@@ -223,7 +223,7 @@ Authorization: Bearer token
     destination = os.path.join(output, "out")
     os.makedirs(destination, exist_ok=True)
 
-    miner_home = os.path.join(f"{TOOL_FOLD}/MINER", "restler_bin_atten/restler/Restler")
+    miner_home = os.path.join(f"{TOOL_ROOT}/MINER", "restler_bin_atten/restler/Restler")
     mkdir = f"mkdir {destination}"
     compile = f"chmod 777 {miner_home} && {miner_home} compile --api_spec {swagger}"
     run_miner = f"{miner_home} fuzz --grammar_file ./Compile/grammar.py --dictionary_file ./Compile/dict.json --settings ./Compile/engine_settings.json --no_ssl --time_budget {budget / 3600} --disable_checkers payloadbody"
@@ -238,7 +238,7 @@ Authorization: Bearer token
 
 def run_evomaster(expName, swagger, budget, output, server, authKey=None, authValue=None):
 
-    evo_home = os.path.join(TOOL_FOLD, "evomaster.jar")
+    evo_home = os.path.join(TOOL_ROOT, "evomaster.jar")
 
     time_limit = str(budget) + "s"
 
@@ -253,7 +253,7 @@ def run_evomaster(expName, swagger, budget, output, server, authKey=None, authVa
 
 
 def run_schemathesis(expName, swagger, budget, output, server, authKey=None, authValue=None):
-    cli_file = os.path.join(TOOL_FOLD, "schemathesis_cli.py")
+    cli_file = os.path.join(TOOL_ROOT, "schemathesis_cli.py")
 
     if authValue is None:
         run = f"screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {server} {budget} > {output}/log.log 2>&1\""
