@@ -6,6 +6,8 @@ from typing import Optional
 
 import click
 import requests
+import platform
+import shutil
 from pathlib import Path
 
 current_file = Path(__file__).resolve()
@@ -410,10 +412,101 @@ def cli(sut, port, output_dir, disable_mitmproxy, disable_jacoco):
 
 
 def isReady():
-    """check jdk, api jars, Jacoco agent exist"""
-    # check the available of different JDK versions
-    
+    """
+    Check if the system meets all prerequisites:
+    Linux OS, screen, Java, API jars, JaCoCo agent, Docker, mitmproxy.
+    Print [OK] for success and [FAIL] for missing components.
+    """
+    success = True
 
+    # 检查OS
+    if platform.system() == 'Linux':
+        print("[ OK ] Linux operating system detected")
+    else:
+        print("[FAIL] Experiment replication only supports Linux (detected: {})".format(platform.system()))
+        success = False
+
+    # 检查 screen
+    if shutil.which('screen'):
+        print("[ OK ] 'screen' command is available")
+    else:
+        print("[FAIL] 'screen' command not found. 'screen' is required to manage multiple terminal windows during the experiment.")
+        success = False
+
+    def check_java_version(env_file, expected_version):
+        """
+        加载指定的环境文件后，检查java版本是否符合期望
+        env_file: 环境文件路径（如 'java8.env'）
+        expected_version: 期望Java主版本（如 '1.8', '11', '17'）
+        """
+        # 运行一个临时bash shell，source 环境文件后再运行java -version
+        cmd = f'bash -c ". {env_file} && java -version"'
+
+        try:
+            # java -version 输出到 stderr
+            output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True, text=True)
+            if f'version "{expected_version}' in output:
+                print(f"[ OK ] Java {expected_version} correctly set by {env_file}")
+                return True
+            else:
+                print(f"[FAIL] Java {expected_version} NOT correctly set by {env_file}")
+                print(f"       Actual output: {output.strip().splitlines()[0]}")
+                return False
+
+        except subprocess.CalledProcessError as e:
+            print(f"[FAIL] Error running java after sourcing {env_file}: {e.output}")
+            return False
+    # 检查 Java (JDK)
+    JDK_8 = os.path.join(API_SUTS_FOLD, 'java8.env')
+    JDK_11 = os.path.join(API_SUTS_FOLD, 'java11.env')
+    JDK_17 = os.path.join(API_SUTS_FOLD, 'java17.env')
+    success &= check_java_version(JDK_8, '1.8')
+    success &= check_java_version(JDK_11, '11')
+    success &= check_java_version(JDK_17, '17')
+
+    # 检查 API jar
+    for service in emb_services:
+        jar_path = os.path.join(API_SUTS_FOLD, service.run_jar)
+        if os.path.exists(jar_path):
+            print(f"[ OK ] API jar '{jar_path}' found")
+        else:
+            print(f"[FAIL] API jar '{jar_path}' is missing")
+            success = False
+
+
+    # 检查 JaCoCo agent
+    jacoco_agent = os.path.join(API_SUTS_FOLD, 'jacoco', 'jacocoagent.jar')
+    if os.path.exist(jacoco_agent):
+        print(f"[ OK ] JaCoCo agent '{jacoco_agent}' found")
+    else:
+        print(f"[FAIL] JaCoCo agent '{jacoco_agent}' is missing")
+        success = False
+    jacoco_cli = os.path.join(API_SUTS_FOLD, 'jacoco', 'jacococli.jar')
+    if os.path.exist(jacoco_cli):
+        print(f"[ OK ] JaCoCo CLI '{jacoco_cli}' found")
+    else:
+        print(f"[FAIL] JaCoCo CLI '{jacoco_cli}' is missing")
+        success = False
+
+    # 检查 Docker
+    if shutil.which('docker'):
+        print("[ OK ] Docker is installed")
+    else:
+        print("[FAIL] Docker is not installed or not in PATH")
+        success = False
+
+    # 检查 mitmproxy
+    if shutil.which('mitmproxy'):
+        print("[ OK ] mitmproxy is installed")
+    else:
+        print("[FAIL] mitmproxy is not installed or not in PATH. mitmproxy is required to capture and analyze HTTP requests during the experiment.")
+        success = False
+
+    if success:
+        print("[ OK ] All prerequisites are met")
+    else:
+        print("[FAIL] Some prerequisites are missing. Please install the missing components and try again.")
+    return success
 
 
 if __name__ == "__main__":
