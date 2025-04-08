@@ -89,7 +89,7 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
         return
 
 
-def run_emrest(expName, swagger, budget, output, server, authKey=None, authValue=None):
+def run_emrest(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
     """generate bash scripts for running emrest"""
     # enter the emrest folder to use poetry
     emrest_fold = Path(__file__).parents[3] / "EmRest"
@@ -119,7 +119,7 @@ def run_emrest(expName, swagger, budget, output, server, authKey=None, authValue
         "--budget": budget,
         "--output_path": output,
         "--pict": pict,
-        "--server": server
+        "--server": serverUrl
     }
 
     if authKey is not None and authValue is not None:
@@ -134,30 +134,30 @@ def run_emrest(expName, swagger, budget, output, server, authKey=None, authValue
     print("EmRest is started")
 
 
-def run_arat_rl(expName, swagger, budget, output, server, authKey=None, authValue=None):
+def run_arat_rl(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
 
     main_py = os.path.join(f"{TOOL_ROOT}/ARAT-RL", "main.py")
 
     if authValue is None:
-        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {server} {budget} > {output}/log.log 2>&1\""
+        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
     else:
-        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {server} {budget} {authValue} > {output}/log.log 2>&1\""
+        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} {authValue} > {output}/log.log 2>&1\""
 
     subprocess.run(run, shell=True)
 
 
-def run_morest(expName, swagger, budget, output, server, authKey=None, authValue=None):
+def run_morest(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
     main_py = os.path.join(f"{TOOL_ROOT}/morest", "fuzzer.py")
 
     if authValue is None:
-        run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {server} {budget} > {output}/log.log 2>&1\""
+        run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
     else:
-        run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {server} {budget} {authValue} > {output}/log.log 2>&1\""
+        run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} {authValue} > {output}/log.log 2>&1\""
 
     subprocess.run(run, shell=True)
 
 
-def run_restct(expName, swagger, budget, output, server, authKey=None, authValue=None):
+def run_restct(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
     output_dir = os.path.join(output, f"exp_out")
     os.makedirs(output_dir, exist_ok=True)
 
@@ -167,7 +167,7 @@ def run_restct(expName, swagger, budget, output, server, authKey=None, authValue
     PATTERNS = os.path.join(f"{TOOL_ROOT}/RestCT", "lib/matchrules.json")
 
     config_with_token = {
-        "--server": server,
+        "--server": serverUrl,
         "--swagger": swagger,
         "--dir": output_dir,
         "--patterns": PATTERNS,
@@ -176,7 +176,7 @@ def run_restct(expName, swagger, budget, output, server, authKey=None, authValue
         "--header": f"Authorization: Bearer {authValue}"
     }
     config_without_token = {
-        "--server": server,
+        "--server": serverUrl,
         "--swagger": swagger,
         "--dir": output_dir,
         "--patterns": PATTERNS,
@@ -195,7 +195,7 @@ def run_restct(expName, swagger, budget, output, server, authKey=None, authValue
     subprocess.run(run, shell=True)
 
 
-def run_miner(expName, swagger, budget, output, server, authKey=None, authValue=None):
+def run_miner(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
     def write_token(destination, token):
         token_file = os.path.join(destination, "token.txt")
         token = """
@@ -236,7 +236,7 @@ Authorization: Bearer token
     subprocess.run(f"cd {destination} && {run}", shell=True)
 
 
-def run_evomaster(expName, swagger, budget, output, server, authKey=None, authValue=None):
+def run_evomaster(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
 
     evo_home = os.path.join(TOOL_ROOT, "evomaster.jar")
 
@@ -244,7 +244,7 @@ def run_evomaster(expName, swagger, budget, output, server, authKey=None, authVa
 
     java_8 = Path(__file__).parents[3] / "api-suts/java8.env"
 
-    run_evo = f". {java_8} && java -jar {evo_home} --blackBox true --bbSwaggerUrl file://{swagger} --bbTargetUrl {server} --outputFormat JAVA_JUNIT_4 --maxTime {time_limit} --outputFolder {output}"
+    run_evo = f". {java_8} && java -jar {evo_home} --blackBox true --bbSwaggerUrl file://{swagger} --bbTargetUrl {serverUrl} --outputFormat JAVA_JUNIT_4 --maxTime {time_limit} --outputFolder {output}"
     if authValue is not None:
         run_evo += f" --header0 'Authorization: Bearer {authValue}'"
     run = f"screen -dmS evomaster_{expName} bash -c \"{run_evo} > {output}/log.log 2>&1\""
@@ -252,15 +252,15 @@ def run_evomaster(expName, swagger, budget, output, server, authKey=None, authVa
     subprocess.run(run, shell=True)
 
 
-def run_schemathesis(expName, swagger, budget, output, server, authKey=None, authValue=None):
+def run_schemathesis(expName, swagger, budget, output, serverUrl, authKey=None, authValue=None):
     cli_file = os.path.join(TOOL_ROOT, "schemathesis_cli.py")
 
     if authValue is None:
-        run = f"screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {server} {budget} > {output}/log.log 2>&1\""
+        run = f"screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} > {output}/log.log 2>&1\""
     else:
-        run = f"screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {server} {budget} {authValue} > {output}/log.log 2>&1\""
+        run = f"screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} {authValue} > {output}/log.log 2>&1\""
 
-    print(run)
+    # print(run)
     subprocess.run(run, shell=True)
 
 
