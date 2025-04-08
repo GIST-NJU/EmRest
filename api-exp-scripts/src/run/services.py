@@ -390,7 +390,7 @@ def find_service_by_name(name: str) -> Service:
 @click.option('--output-dir', type=str, required=True, help='Directory to store the output results.')
 @click.option('--disable-mitmproxy', is_flag=True, default=False, help='Disable the use of mitmproxy.')
 @click.option('--disable-jacoco', is_flag=True, default=False, help='Disable the use of JaCoCo coverage.')
-def run_service(sut, port, output_dir, disable_mitmproxy, disable_jacoco):
+def cli(sut, port, output_dir, disable_mitmproxy, disable_jacoco):
     """
     CLI to run a service under test (SUT) with optional mitmproxy and JaCoCo.
     """
@@ -407,6 +407,13 @@ def run_service(sut, port, output_dir, disable_mitmproxy, disable_jacoco):
     click.echo(f"Output will be stored in '{output_dir}'.")
     click.echo(f"mitmproxy is {'enabled' if use_mitmproxy else 'disabled'}.")
     click.echo(f"JaCoCo coverage is {'enabled' if use_jacoco else 'disabled'}.")
+
+
+def isReady():
+    """check jdk, api jars, Jacoco agent exist"""
+    # check the available of different JDK versions
+    
+
 
 
 if __name__ == "__main__":
