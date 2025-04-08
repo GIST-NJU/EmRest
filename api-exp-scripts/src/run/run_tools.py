@@ -1,6 +1,7 @@
 import click
 import os
 import subprocess
+import json
 from pathlib import Path
 
 tools = [
@@ -51,25 +52,25 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
         os.mkdir(output)
 
     if tool.lower() == 'emrest':
-        run_emrest(swagger, budget, output, port, authKey, authValue)
+        run_emrest(expName, swagger, budget, output, serverUrl, authKey, authValue)
     elif tool.lower() == 'arat-rl':
         run_arat_rl(expName, swagger, budget, output, serverUrl, authKey, authValue)
     elif tool.lower() == 'morest':
         run_morest(expName, swagger, budget, output, serverUrl, authKey, authValue)
     elif tool.lower() == 'restct':
-        run_restct(swagger, budget, output, port, authKey, authValue)
+        run_restct(expName, swagger, budget, output, serverUrl, authKey, authValue)
     elif tool.lower() == 'miner':
         run_miner(expName, swagger, budget, output, serverUrl, authKey, authValue)
     elif tool.lower() == 'evomaster':
         run_evomaster(expName, swagger, budget, output, serverUrl, authKey, authValue)
     elif tool.lower() == 'schemathesis':
-        run_schemathesis(swagger, budget, output, port, authKey, authValue)
+        run_schemathesis(expName, swagger, budget, output, serverUrl, authKey, authValue)
     else:
         print("Unsupported tool: " + tool)
         return
 
 
-def run_emrest(swagger, budget, output, server, authKey=None, authValue=None):
+def run_emrest(expName, swagger, budget, output, server, authKey=None, authValue=None):
     """generate bash scripts for running emrest"""
     # enter the emrest folder to use poetry
     emrest_fold = Path(__file__).parents[3] / "EmRest"
@@ -137,9 +138,42 @@ def run_morest(expName, swagger, budget, output, server, authKey=None, authValue
     subprocess.run(run, shell=True)
 
 
-def run_restct(swagger, budget, output, server, authKey=None, authValue=None):
-    # TODO: implement this
-    pass
+def run_restct(expName, swagger, budget, output, server, authKey=None, authValue=None):
+    output_dir = os.path.join(output, f"exp_out")
+    os.makedirs(output_dir, exist_ok=True)
+
+    main_py = os.path.join(f"{TOOL_FOLD}/RestCT", "src/app.py")
+
+    ACTS = os.path.join(f"{TOOL_FOLD}/RestCT", "lib/acts_2.93.jar")
+    PATTERNS = os.path.join(f"{TOOL_FOLD}/RestCT", "lib/matchrules.json")
+
+    config_with_token = {
+        "--server": server,
+        "--swagger": swagger,
+        "--dir": output_dir,
+        "--patterns": PATTERNS,
+        "--jar": ACTS,
+        "--budget": budget,
+        "--header": f"Authorization: Bearer {authValue}"
+    }
+    config_without_token = {
+        "--server": server,
+        "--swagger": swagger,
+        "--dir": output_dir,
+        "--patterns": PATTERNS,
+        "--jar": ACTS,
+        "--budget": budget,
+    }
+
+    config_args = ' '.join([f'{k} {v}' for k, v in config_without_token.items() if v is not None])
+    config_args_token = ' '.join([f'{k} {v}' for k, v in config_with_token.items() if v is not None])
+
+    if authValue is not None:
+        run = f"source activate restct && screen -dmS restct_{expName} bash -c \"python {main_py} {config_args_token} > {output}/log.log 2>&1\""
+    else:
+        run = f"source activate restct && screen -dmS restct_{expName} bash -c \"python {main_py}  {config_args} > {output}/log.log 2>&1\""
+
+    subprocess.run(run, shell=True)
 
 
 def run_miner(expName, swagger, budget, output, server, authKey=None, authValue=None):
@@ -199,9 +233,16 @@ def run_evomaster(expName, swagger, budget, output, server, authKey=None, authVa
     subprocess.run(run, shell=True)
 
 
-def run_schemathesis(swagger, budget, output, server, authKey=None, authValue=None):
-    # TODO: implement this
-    pass
+def run_schemathesis(expName, swagger, budget, output, server, authKey=None, authValue=None):
+    cli_file = os.path.join(TOOL_FOLD, "schemathesis_cli.py")
+
+    if authValue is None:
+        run = f"screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {server} {budget} > {output}/log.log 2>&1\""
+    else:
+        run = f"screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {server} {budget} {authValue} > {output}/log.log 2>&1\""
+
+    print(run)
+    subprocess.run(run, shell=True)
 
 
 if __name__ == "__main__":
