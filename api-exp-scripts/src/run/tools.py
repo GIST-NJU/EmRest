@@ -6,7 +6,7 @@ import json
 import platform
 from pathlib import Path
 
-tools = [
+TOOLS = [
     'emrest',
     'arat-rl',
     'morest',
@@ -36,7 +36,7 @@ def cli():
 
 @cli.command(name="run")
 @click.option('--tool', '-t', required=True,
-              type=click.Choice(tools),
+              type=click.Choice(TOOLS),
               help='the REST APIs testing tool to use')
 @click.option('--expName', '-e', required=False, help='the name of API under test')
 @click.option('--swaggerV2', '-s2', required=False, help='the swagger file of the API under test, in v2 format')
@@ -54,8 +54,8 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
     def validate():
         if not tool:
             raise Exception("Tool not specified")
-        if tool not in tools:
-            raise Exception(f"Use one of the following tools: {tools}")
+        if tool not in TOOLS:
+            raise Exception(f"Use one of the following tools: {TOOLS}")
         if not swaggerV2 and not swaggerV3:
             raise Exception("Swagger file not specified, please specify swaggerV2 or swaggerV3")
         if not output:
