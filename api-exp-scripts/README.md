@@ -41,7 +41,7 @@ Before proceeding, ensure the following software is installed on your Linux syst
 - Docker and Docker Compose
 - Conda (installation script provided)
 - Poetry (installation script provided)
-- Screen
+- Screen (a terminal multiplexer for Linux systems, use `sudo yum install -y screen` to install it on Centos 7)
 
 ---
 
@@ -86,9 +86,75 @@ We provide installation scripts for Conda and Poetry:
 
     - Set up the experiment scripts (this directory) so you can run them immediately.
 
+## Verify and Run Experiment Scripts
+Current ditectory (`api-exp-scripts`) uses three Python scripts in the `src/run` directory for orchestrating experiments:
+- **`services.py`**: Manages REST APIs (SUTs).  
+- **`tools.py`**: Manages testing tools (baselines and EmRest).
+- **`replicate.py`**: Automates the **full experimental process** used in our paper
 
-## Verify APIs can be successfully running
+### `tools.py`
 
+Rely on [Click](https://palletsprojects.com/p/click/) for CLI commands, each exposing subcommands named `run` and `check`
+- `check`: Verifies whether your system is ready to execute the testing tools (e.g., checks for Conda environments, required Python versions, etc.).
 
+- `run`: Invokes one of the supported baseline tools or EmRest to test a specified API, requiring parameters such as the OpenAPI spec file path, test budget, and output directory.
 
-## Verify tools can be successfully running
+#### Example Usage
+
+```bash
+# 1) Check environment readiness for running testing tools
+poetry run python src/run/tools.py check
+
+# 2) Run a specified tool (e.g., 'arat-rl') on an API, with one-hour budget
+poetry run python src/run/tools.py run \
+  --tool arat-rl \
+  --expName MyAPI \
+  --swaggerV2 ../api-suts/MyAPI/openapi_v2.yaml \
+  --budget 3600 \
+  --output logs/tools_run \
+  --serverUrl http://localhost:8080/api
+```
+### `services.py`
+Also rely on [Click](https://palletsprojects.com/p/click/) for CLI commands, each exposing subcommands named `run` and `check`
+- **`check`**: Verifies your environment meets the requirements for starting any of the APIs (SUTs).  
+- **`run`**: Starts a chosen service on a specified port, optionally enabling/disabling JaCoCo coverage and mitmproxy interception.
+
+#### Example Usage
+
+```bash
+# 1) Check if your environment can properly launch the SUT
+poetry run python src/run/services.py check
+
+# 2) Run an SUT named 'myDemo' on port 8080, storing logs in 'logs/'
+poetry run python src/run/services.py run \
+  --sut myDemo \
+  --port 8080 \
+  --output-dir logs
+```
+
+### `replicate.py`
+Automates the **full experimental process** used in our paper. When you run it (usually via `poetry run python src/run/replicate.py`), it performs multiple testing rounds for each tool and API`. The key points are:
+
+1. **Two Groups of Services**  
+   - **`gitlab_services`** (6 APIs): GitLab APIs, each also running for 1 hour per round, but they consume significantly more memory.
+   - **`emb_services`** (10 APIs), each running for 1 hour per round.  
+   
+
+2. **Multiple Rounds**  
+   Each testing tool is repeated for **30 rounds**:
+   1. Launch and test **all emb_services** (10 APIs) in parallel for 1 hour.  
+   2. After that hour, clean up and then launch **all gitlab_services** (6 APIs) in parallel for another hour.
+
+3. **High Memory Requirements**  
+   Our original experiment machine featured **120 GB of RAM**, which is barely enough to run all 6 GitLab-based services simultaneously. If you have less memory available, you may need to reduce the number of concurrent SUTs (e.g., run them in smaller batches) or extend the total experimentation time.
+
+4. **Raw Results**  
+   The script collects all logs, coverage data, and bug detection information into output directories, mirroring the structure described in our paper. This ensures you can replicate the original results and produce the same data and figures.
+
+### Usage Example
+
+From the `api-exp-scripts` directory, after completing all setup steps, simply run:
+
+```bash
+poetry run python src/run/replicate.py
+```
