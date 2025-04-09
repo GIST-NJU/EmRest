@@ -38,6 +38,9 @@
 - [☑️] 删除```run_tools.py```中工具中的无用参数
 - [☑️] 更新restct的requirements文件，确定版本
 
+### 4月9日
+- ```replicate.py```中是否需要from tools import run_tool, tools？从中导入tools
+
 **EmRest** is a black-box testing tool that leverages error message analysis to enhance the generation of both valid and exceptional test inputs for REST APIs.  
 EmRest has been accepted at **ISSTA 2025**. This repository contains its implementation, benchmarks, baselines, and experiment scripts.
 
