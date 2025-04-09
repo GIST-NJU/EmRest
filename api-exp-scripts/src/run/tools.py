@@ -111,7 +111,7 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
 def _run_emrest(expName, swagger, budget, output, serverUrl, suffix='', authKey=None, token=None):
     """generate bash scripts for running emrest"""
     # enter the emrest folder to use poetry
-    emrest_fold = Path(__file__).parents[3] / "EmRest"
+    emrest_fold = Path(__file__).parents[3] / "EmRest_core"
     if not emrest_fold.exists():
         print("EmRest folder not found")
         return
