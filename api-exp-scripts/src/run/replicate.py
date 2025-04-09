@@ -4,7 +4,7 @@ import subprocess
 import requests
 import json
 from services import Service, emb_services, gitlab_services, run_emb_service, run_gitlab_service, get_gitlab_token
-from tools import run_tool
+from tools import run_tool, tools
 from pathlib import Path
 
 
