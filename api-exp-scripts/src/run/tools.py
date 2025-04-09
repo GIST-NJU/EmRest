@@ -71,7 +71,10 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
             else:
                 raise Exception("arat-rl requires swagger in v2 format, but swaggerV2 is not specified")
         else:
-            raise Exception("Not Implemented for other tools")
+            if swaggerV3:
+                return swaggerV3
+            else:
+                raise Exception("Not Implemented for other tools")
 
     tool = tool.lower()
     validate()
