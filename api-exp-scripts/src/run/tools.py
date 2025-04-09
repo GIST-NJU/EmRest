@@ -74,7 +74,7 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
             if swaggerV3:
                 return swaggerV3
             else:
-                raise Exception("Not Implemented for other tools")
+                raise Exception("tool requires swagger in v3 format, but swaggerV3 is not specified")
 
     tool = tool.lower()
     validate()

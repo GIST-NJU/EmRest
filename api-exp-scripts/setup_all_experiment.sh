@@ -42,6 +42,7 @@ conda run -n emrest-py311 poetry env use python3.11
 
 echo "[INFO] Installing EmRest dependencies via Poetry"
 conda run -n emrest-py311 poetry install
+poetry run python3 -m spacy download en_core_web_sm
 
 ###########################################################
 # 4. Set up experiment scripts environment
@@ -49,8 +50,6 @@ conda run -n emrest-py311 poetry install
 echo "----- Step 4: Setting up experiment scripts in ../api-exp-scripts -----"
 cd "$SCRIPT_DIR"
 
-# Use the same conda environment logic if you want the experiment scripts
-# to also run under the same environment. Example:
 conda run -n emrest-py311 poetry env use python3.11
 conda run -n emrest-py311 poetry install
 
