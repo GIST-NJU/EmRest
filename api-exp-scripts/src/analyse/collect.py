@@ -7,7 +7,7 @@ import pandas as pd
 import yaml
 from tqdm import trange
 
-from src.run.services import API_SUTS_FOLD, gitlab_services, emb_services
+from src.run.services import API_SUTS_FOLD, JACOCO_CLI, gitlab_services, emb_services
 from src.run.tools import TOOLS
 
 """
@@ -267,13 +267,53 @@ def parse_proxy_file(sut: str, proxy_file: str, path_patterns: dict[str, list[st
     proxy_df["op_total"] = sum([len(_s) for _s in operations.values()])
     return proxy_df, bug_total, bug_unique
 
+def get_emb_coverage(sut_path: str, exec_file: str) -> tuple[int, float]:
+    def get_source_files_for_jacoco():
+        source_files = []
+        sub_dirs = [x[0] for x in os.walk(sut_path)]
+        for sub_dir in sub_dirs:
+            if "/main/java/" in sub_dir:
+                target_dir = sub_dir[:sub_dir.rfind("/main/java/") + 10]
+                if target_dir not in source_files:
+                    source_files.append(target_dir)
+        return source_files
+    
+    def get_class_files_for_jacoco():
+        class_files = []
+        sub_dirs = [x[0] for x in os.walk(sut_path)]
+        for sub_dir in sub_dirs:
+            if "/target/classes/" in sub_dir:
+                target_dir = sub_dir[:sub_dir.rfind("/target/classes/") + 15]
+                if target_dir not in class_files:
+                    class_files.append(target_dir)
+            if "/build/classes/" in sub_dir:
+                target_dir = sub_dir[:sub_dir.rfind("/build/classes/") + 14]
+                if target_dir not in class_files:
+                    class_files.append(target_dir)
+        return class_files
+
+    class_files = get_class_files_for_jacoco()
+    if len(class_files) == 0:
+        print(f"[Warning] No class files found for {sut_path}")
+        return 0, 0.0
+    cf_command = " ".join([f"--classfiles {x}" for x in class_files])
+    to_csv = exec_file.replace(".exec", "_exec.csv")
+    command = f"java -jar {JACOCO_CLI} report {exec_file} {class_files_command} --csv {to_csv}"
+
+    # read the csv file
+    # TODO: return covered line and line coverage [int, float]
+    return 0, 0.0
+
+def get_gitlab_coverage(sut_path: str, exec_file: str) -> tuple[int, float]:
+    # TODO: implement
+    return 0, 0.0
 
 def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
     """
     :param directory: a round of data, e.g. emrest/round1,
     :param result_dir: the directory to save the result
     """
-    def find_proxy_file(suffix: str, target_dir: str = None):
+    def find_file(suffix: str, target_dir: str = None):
         for file in os.listdir(target_dir):
             if file.endswith(suffix):
                 return os.path.join(target_dir, file)
@@ -321,6 +361,18 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
         # Keep all numeric data with two decimal places
         reformat_merged_df = merged_df.map(lambda x: '{:.2f}'.format(x) if isinstance(x, (int, float)) else x)
 
+        # if line coverage is available, add it to the DataFrame
+        if len(line_coverages['sut']) > 0:
+            line_coverage_df = pd.DataFrame(line_coverages)
+            line_coverage_df = line_coverage_df.rename(columns={
+                "sut": "SUT",
+                "covered_lines": "Covered Lines",
+                "line_coverage": "Line Coverage"
+            })
+            reformat_merged_df = pd.merge(reformat_merged_df, line_coverage_df, on='SUT', how='outer')
+            reformat_merged_df['Covered Lines'] = reformat_merged_df['Covered Lines'].astype(int)
+            reformat_merged_df['Line Coverage'] = reformat_merged_df['Line Coverage'].astype(float).map(lambda x: '{:.2f}'.format(x))
+
         # Save final CSV files
         result_csv = os.path.join(result_dir, "coverage_and_bug.csv")
         reformat_merged_df.to_csv(result_csv, index=False)
@@ -332,11 +384,12 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
 
     r_info = pd.DataFrame(columns=["sut", "op", "op_total", "status", "timestamp"])
     bug_info_list = {"sut": [], "total_bugs": [], "unique_bugs": []}  
+    line_coverages = {"sut": [], "covered_lines": [], "line_coverage": []}
     for sut in emb_services + gitlab_services:
         sut_fold = os.path.join(directory, sut.exp_name)
         if not os.path.exists(sut_fold):
             continue
-        proxy_file = find_proxy_file("_proxy.txt", sut_fold)
+        proxy_file = find_file("_proxy.txt", sut_fold)
         if proxy_file is None:
             continue
         spec_file = os.path.join(API_SUTS_FOLD, sut.spec_file_v3)
@@ -350,6 +403,20 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
         if not os.path.exists(bu_file):
             with open(bu_file, "w") as f:
                 json.dump({k: list(v) for k, v in bug_unique.items()}, f, indent=4)
+
+        exec_file = find_file(".exec", sut_fold)
+        if exec_file is not None:
+            sut_path = os.path.join(API_SUTS_FOLD, sut.service_path)
+            covered, coverage = get_emb_coverage(sut_path, exec_file)
+            line_coverages['sut'].append(sut.exp_name)
+            line_coverages['covered_lines'].append(covered)
+            line_coverages['line_coverage'].append(coverage)
+        coverge_file = find_file("_coverage.json")
+        if coverge_file is not None:
+            covered, coverage = get_gitlab_coverage(coverage_file)
+            line_coverages['sut'].append(sut.exp_name)
+            line_coverages['covered_lines'].append(covered)
+            line_coverages['line_coverage'].append(coverage)
 
     return process_request_info()
 
@@ -399,15 +466,29 @@ def handle_multiple_rounds(directory: str, output: str):
         df = pd.concat(dfs, ignore_index=True)
 
         # group by SUT and calculate the mean of each column
-        grouped = df.groupby('SUT').agg(
-            Op_20X_mean=('Op_20X', 'mean'),
-            Op_20X_50X_mean=('Op_20X_50X', 'mean'),
-            Op_All=('Op_All', 'mean'),
-            Duration=('Duration', 'mean'),
-            Total_Bugs_mean=('Total Bugs', 'mean'),
-            Unique_Bugs_mean=('Unique Bugs', 'mean'),
-            Count=('Unique Bugs', 'size')
-        )
+        if "Line Coverage" in df.columns:
+            df["Line Coverage"] = df["Line Coverage"].astype(float)
+            grouped = df.groupby('SUT').agg(
+                Op_20X_mean=('Op_20X', 'mean'),
+                Op_20X_50X_mean=('Op_20X_50X', 'mean'),
+                Op_All=('Op_All', 'mean'),
+                Duration=('Duration', 'mean'),
+                Total_Bugs_mean=('Total Bugs', 'mean'),
+                Unique_Bugs_mean=('Unique Bugs', 'mean'),
+                Line_Coverage_mean=('Line Coverage', 'mean'),
+                Covered_Lines_mean=('Covered Lines', 'mean'),
+                Count=('Unique Bugs', 'size')
+            )
+        else:
+            grouped = df.groupby('SUT').agg(
+                Op_20X_mean=('Op_20X', 'mean'),
+                Op_20X_50X_mean=('Op_20X_50X', 'mean'),
+                Op_All=('Op_All', 'mean'),
+                Duration=('Duration', 'mean'),
+                Total_Bugs_mean=('Total Bugs', 'mean'),
+                Unique_Bugs_mean=('Unique Bugs', 'mean'),
+                Count=('Unique Bugs', 'size')
+            )
         print(grouped.to_string(index=True))
         result_csv = os.path.join(result_dir, "result.html")
         grouped.to_html(result_csv, escape=False, render_links=True)

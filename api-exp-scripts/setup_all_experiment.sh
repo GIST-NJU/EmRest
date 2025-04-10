@@ -28,21 +28,11 @@ chmod +x setup.sh
 ###########################################################
 # 3. Create a Conda env with Python 3.11 & install EmRest
 ###########################################################
-echo "----- Step 3: Installing EmRest in ../EmRest_core with Python 3.11 -----"
+echo "----- Step 3: Setting up EmRest in ../EmRest_core with Python 3.11 -----"
 cd "$SCRIPT_DIR/../EmRest_core"
 
-# Create a new Conda environment named 'emrest-py311' with Python 3.11
-echo "[INFO] Creating conda environment 'emrest-py311' with Python 3.11"
-conda create -n emrest-py311 python=3.11 -y
-
-# Install EmRest using Poetry within this Conda environment.
-# First, let Poetry itself point to python3.11 from the conda env.
-echo "[INFO] Setting Poetry to use Python 3.11 in conda env 'emrest-py311'"
-conda run -n emrest-py311 poetry env use python3.11
-
-echo "[INFO] Installing EmRest dependencies via Poetry"
-conda run -n emrest-py311 poetry install
-poetry run python3 -m spacy download en_core_web_sm
+chmod +x setup.sh
+./setup.sh
 
 ###########################################################
 # 4. Set up experiment scripts environment
@@ -50,8 +40,11 @@ poetry run python3 -m spacy download en_core_web_sm
 echo "----- Step 4: Setting up experiment scripts in ../api-exp-scripts -----"
 cd "$SCRIPT_DIR"
 
-conda run -n emrest-py311 poetry env use python3.11
-conda run -n emrest-py311 poetry install
+echo "[INFO] Creating conda environment 'emrest' with Python 3.11"
+conda create -n exp python=3.11 -y
+echo "[INFO] Installing dependencies via pip"
+conda run -n exp pip install --upgrade pip
+conda run -n exp pip install -r requirements.txt
 
 echo "===== All steps completed successfully. ====="
 echo "[OK] You are now ready to run experiments!"

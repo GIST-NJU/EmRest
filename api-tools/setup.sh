@@ -38,6 +38,7 @@ do
     fi
 
     echo "Installing packages from '$req_file' into environment '$env'..."
+    conda run -n "$env" pip install --upgrade pip
     conda run -n "$env" pip install -r "$req_file"
 
     if [ "$env" = "restct" ]; then
