@@ -32,7 +32,7 @@ logger.addHandler(error_handler)
 logger.addHandler(info_handler)
 
 """
-1. 解析一轮的实验数据 -> Operation Coverage (csv), Bug Detection (csv), and a folder of bug.json for each sut
+1. parse a round of data -> Operation Coverage (csv), Bug Detection (csv), and a folder of bug.json for each sut
 """
 
 bug_total = {}
@@ -40,8 +40,6 @@ bug_unique = {}
 
 case_20X = {}
 case_500 = {}
-
-unresolved_urls = {}
 
 
 def get_unique_bug(_sut: str, response: str):
@@ -246,7 +244,7 @@ def parse_proxy_file(sut: str, proxy_file: str, path_patterns: dict[str, list[st
 
                 target_path = find_target_path(resolved_uri, method)
                 if target_path is None:
-                    unresolved_urls[sut].append(f"line {k} -> {method}:{resolved_uri}")
+                    logger.warn(f"line {k} -> {method}:{resolved_uri}")
                     continue
 
                 op_id = f"{method}:{target_path}"
@@ -314,7 +312,7 @@ def parse_proxy_file(sut: str, proxy_file: str, path_patterns: dict[str, list[st
 
     with open(proxy_file, 'r') as f:
         lines = f.readlines()
-    global bug_total, bug_unique, case_500, case_20X, unresolved_urls
+    global bug_total, bug_unique, case_500, case_20X
     proxy_data = get_cases(lines)
     proxy_df = pd.DataFrame.from_dict(data=proxy_data)
     proxy_df["sut"] = sut
@@ -339,12 +337,11 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
                     return os.path.join(root, file)
         return None
 
-    global bug_total, bug_unique, case_500, case_20X, unresolved_urls
+    global bug_total, bug_unique, case_500, case_20X
     bug_total.clear()
     bug_unique.clear()
     case_500.clear()
     case_20X.clear()
-    unresolved_urls.clear()
 
     dir_name = os.path.basename(directory)
 
@@ -358,7 +355,6 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
         bug_unique[sut.exp_name] = {}
         case_20X[sut.exp_name] = {}
         case_500[sut.exp_name] = {}
-        unresolved_urls[sut.exp_name] = []
 
         spec_file = os.path.join(API_SUTS_FOLD, sut.spec_file_v3)
 
@@ -400,17 +396,6 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
         with open(bug_file, "w") as fp:
             json.dump({k: list(v) for k, v in bug_unique[sut].items()}, fp)
 
-        # case_20X_file = os.path.join(result_dir, dir_name, f"{sut}_case_20X.json")
-        # with open(case_20X_file, "w") as fp:
-        #     json.dump(case_20X[sut], fp)
-        #
-        # case_500_file = os.path.join(result_dir, dir_name, f"{sut}_case_500.json")
-        # with open(case_500_file, "w") as fp:
-        #     json.dump(case_500[sut], fp)
-
-        unresolved_file = os.path.join(result_dir, dir_name, f"{sut}_unresolved_urls.json")
-        with open(unresolved_file, "w") as fp:
-            json.dump(unresolved_urls[sut], fp)
 
     # merge result df
     # 合并 exp_op_20x_count 和 exp_op_20x_50x_count
