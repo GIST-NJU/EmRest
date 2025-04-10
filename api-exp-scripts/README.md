@@ -39,7 +39,7 @@ Before proceeding, ensure the following dependencies are installed on your Linux
 
 ### Provided Installation Scripts
 
-We provide installation scripts for Conda and Poetry:
+We provide installation scripts for Conda:
 
 - **Install Conda**:
 
