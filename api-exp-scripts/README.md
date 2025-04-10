@@ -133,28 +133,9 @@ poetry run python src/run/services.py run \
 ```
 
 ### `replicate.py`
-Automates the **full experimental process** used in our paper. When you run it (usually via `poetry run python src/run/replicate.py`), it performs multiple testing rounds for each tool and API`. The key points are:
+Automates the **full experimental process** used in our paper. Among the 16 evaluated APIs, we categorize them into two groups: **10 `emb_services`** and **6 `gitlab_services`**. For each testing tool, the experiment involves repeating 30 rounds, each structured as follows: first, all 10 `emb_services` run concurrently for **one hour**; after completion and cleanup, all 6 `gitlab_services` then run concurrently for another **one-hour period**. 
 
-1. **Two Groups of Services**  
-   - **`gitlab_services`** (6 APIs): GitLab APIs, each also running for 1 hour per round, but they consume significantly more memory.
-   - **`emb_services`** (10 APIs), each running for 1 hour per round.  
-   
 
-2. **Multiple Rounds**  
-   Each testing tool is repeated for **30 rounds**:
-   1. Launch and test **all emb_services** (10 APIs) in parallel for 1 hour.  
-   2. After that hour, clean up and then launch **all gitlab_services** (6 APIs) in parallel for another hour.
-
-3. **High Memory Requirements**  
-   Our original experiment machine featured **120 GB of RAM**, which is barely enough to run all 6 GitLab-based services simultaneously. If you have less memory available, you may need to reduce the number of concurrent SUTs (e.g., run them in smaller batches) or extend the total experimentation time.
-
-4. **Raw Results**  
-   The script collects all logs, coverage data, and bug detection information into output directories, mirroring the structure described in our paper. This ensures you can replicate the original results and produce the same data and figures.
-
-### Usage Example
-
-From the `api-exp-scripts` directory, after completing all setup steps, simply run:
-
-```bash
-poetry run python src/run/replicate.py
-```
+> **Important Note on Hardware Requirements:**
+> - **Memory**: Our original experiments utilized a machine with **120 GB of RAM**, which was just sufficient for concurrently running all 6 `gitlab_services`. If your machine has less available memory, you should consider reducing the number of simultaneous services.
+> - **Disk Space**: Recording all requests, logs, coverage data, and bug detection information consumes substantial storage space. In our experiments, the total size of generated raw data reached approximately **1.6 TB**. Ensure your system has at least **1.6 TB** of free disk space available to fully replicate the experimental results.

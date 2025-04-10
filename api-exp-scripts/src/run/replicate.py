@@ -46,7 +46,7 @@ def rq1_and_rq2():
         used_services=emb_services, 
         repeats=30, 
         budget_per_round=3600, 
-        result_dir='./rq1_emb'
+        result_dir='./rq1_and_rq2'
     )
 
     # Run the selected tools on GitLab services
@@ -55,7 +55,7 @@ def rq1_and_rq2():
         used_services=gitlab_services, 
         repeats=30, 
         budget_per_round=3600, 
-        result_dir='./rq1_gitlab'
+        result_dir='./rq1_and_rq2'
     )
 
 def rq3():
@@ -72,7 +72,7 @@ def rq3():
         used_services=emb_services, 
         repeats=30, 
         budget_per_round=3600, 
-        result_dir='./rq3_emb'
+        result_dir='./rq3'
     )
 
     # GitLab services
@@ -81,7 +81,7 @@ def rq3():
         used_services=gitlab_services, 
         repeats=30,
         budget_per_round=3600,
-        result_dir='./rq3_gitlab'
+        result_dir='./rq3'
     )
 
 def run_tools_on_emb_services(
