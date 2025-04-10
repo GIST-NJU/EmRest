@@ -243,7 +243,7 @@ def run_tools_on_gitlab_services(
                     output=os.path.join(temp_dir, s[0].exp_name),
                     serverUrl=server,
                     authKey="Authorization",
-                    authValue=tokens[s[0].exp_name],  # pass the retrieved token
+                    token=tokens[s[0].exp_name],  # pass the retrieved token
                 )
                 print(f"    {t} is testing {s[0].exp_name} for {budget_per_round} seconds")
 
