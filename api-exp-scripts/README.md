@@ -34,12 +34,12 @@ This directory (`api-exp-scripts`) contains all scripts and detailed instruction
 
 Before proceeding, ensure the following dependencies are installed on your Linux system (CentOS 7 is recommended, as it was used in our experiments):
 
-- Python 3
 - OpenJDK (versions 1.8, 11, and 17)
 - Maven (we used version 3.8.8 in our experiments) 
 - Gradle (we used version 8.5 in our experiments)
 - Docker and Docker Compose
 - Conda (installation script provided)
+- Python 3 (required for installing `Poetry`)
 - Poetry (installation script provided)
 - Screen (a terminal multiplexer for Linux systems, use `sudo yum install -y screen` to install it on Centos 7)
 
