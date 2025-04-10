@@ -27,7 +27,7 @@ def clean_all():
     subprocess.run("docker stop $(docker ps -q)", shell=True)
     subprocess.run("docker rm $(docker ps -aq)", shell=True)
 
-def rq1_and_rq2():
+def rq1_and_rq2(result_dir: str):
     """
     rq1_and_rq2 orchestrates the experiments for RQ1 and RQ2.
     It filters the tool list (excluding 'emrest-random' and 'emrest-noretry') and then runs
@@ -46,7 +46,7 @@ def rq1_and_rq2():
         used_services=emb_services, 
         repeats=30, 
         budget_per_round=3600, 
-        result_dir='./rq1_and_rq2'
+        result_dir=result_dir
     )
 
     # Run the selected tools on GitLab services
@@ -55,10 +55,10 @@ def rq1_and_rq2():
         used_services=gitlab_services, 
         repeats=30, 
         budget_per_round=3600, 
-        result_dir='./rq1_and_rq2'
+        result_dir=result_dir
     )
 
-def rq3():
+def rq3(result_dir: str):
     """
     rq3 sets up experiments specifically for 'emrest', 'emrest-random', and 'emrest-noretry'.
     It compares these three EmRest variants on emb and GitLab-based services, each repeated 30 times
@@ -72,7 +72,7 @@ def rq3():
         used_services=emb_services, 
         repeats=30, 
         budget_per_round=3600, 
-        result_dir='./rq3'
+        result_dir=result_dir
     )
 
     # GitLab services
@@ -81,7 +81,7 @@ def rq3():
         used_services=gitlab_services, 
         repeats=30,
         budget_per_round=3600,
-        result_dir='./rq3'
+        result_dir=result_dir
     )
 
 def run_tools_on_emb_services(
@@ -265,5 +265,5 @@ def run_tools_on_gitlab_services(
             print(f"    {t} is finished for round {i + 1}")
 
 if __name__ == '__main__':
-    rq1_and_rq2()
-    rq3()
+    rq1_and_rq2('./rq1_and_rq2')
+    rq3('./rq3')

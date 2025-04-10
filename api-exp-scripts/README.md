@@ -15,12 +15,8 @@ This directory (`api-exp-scripts`) contains all scripts and detailed instruction
 
 ### Data Collection and Analysis
 - **`src/analyse/collect.py`**: Aggregates experimental data, including test logs, operation coverage, and bug detection statistics.
-- **`src/analyse/parse.py`**: Processes the collected data and generates result tables and figures in the paper.
+- **`src/analyse/analysis.ipynb`**: Processes the collected data and generates result tables and figures in the paper.
 
-### Dependency Management
-- **`pyproject.toml`** and **`poetry.lock`**: Project dependency files for Poetry, used to manage Python environments and dependencies.
-
----
 
 ## Related Directories (Sibling directories)
 
@@ -39,26 +35,17 @@ Before proceeding, ensure the following dependencies are installed on your Linux
 - Gradle (we used version 8.5 in our experiments)
 - Docker and Docker Compose (pull docker images: `mongo:3.6.2`, `mysql:8.3.0`, `witcan/gitlab-ee-api:latest`)
 - Conda (installation script provided)
-- Python 3 (required for installing `Poetry`)
-- Poetry (installation script provided)
 - Screen (a terminal multiplexer for Linux systems, use `sudo yum install -y screen` to install it on Centos 7)
 
 ### Provided Installation Scripts
 
 We provide installation scripts for Conda and Poetry:
 
-- **Install Conda** (located in `../api-suts`):
+- **Install Conda**:
 
     ```bash
-    cd ../api-suts
     chmod +x install_conda.sh
     ./install_conda.sh
-    ```
-- **Install Poetry** (located in `../EmRest_core`):
-    ```bash
-    cd ../EmRest_core
-    chmod +x install_poetry.sh
-    ./install_poetry.sh
     ```
 
 ## Step-by-Step Environment Setup
@@ -81,7 +68,7 @@ We provide installation scripts for Conda and Poetry:
 
     - Set up baseline testing tools (by calling `setup.sh` in `../api-tools`).
 
-    - Set up `EmRest` in a dedicated Python 3.11 environment (using `Poetry` in `../EmRest_core`).
+    - Set up `EmRest` (by calling `setup.sh` in `../EmRest_core`).
 
     - Set up the experiment scripts (this directory) so you can run them immediately.
 
@@ -102,10 +89,10 @@ Rely on [Click](https://palletsprojects.com/p/click/) for CLI commands, each exp
 
 ```bash
 # 1) Check environment readiness for running testing tools
-poetry run python src/run/tools.py check
+conda run -n exp python src/run/tools.py check
 
 # 2) Run a specified tool (e.g., 'arat-rl') on an API, with one-hour budget
-poetry run python src/run/tools.py run \
+conda run -n exp python src/run/tools.py run \
   --tool arat-rl \
   --expName MyAPI \
   --swaggerV2 ../api-suts/MyAPI/openapi_v2.yaml \
@@ -122,10 +109,10 @@ Also rely on [Click](https://palletsprojects.com/p/click/) for CLI commands, eac
 
 ```bash
 # 1) Check if your environment can properly launch the SUT
-poetry run python src/run/services.py check
+conda run -n exp python src/run/services.py check
 
 # 2) Run an SUT named 'myDemo' on port 8080, storing logs in 'logs/'
-poetry run python src/run/services.py run \
+conda run -n exp python src/run/services.py run \
   --sut myDemo \
   --port 8080 \
   --output-dir logs
@@ -134,23 +121,17 @@ poetry run python src/run/services.py run \
 ### `replicate.py`
 Automates the **full experimental process** used in our paper. Among the 16 evaluated APIs, we categorize them into two groups: **10 `emb_services`** and **6 `gitlab_services`**. For each testing tool, the experiment involves repeating 30 rounds, each structured as follows: first, all 10 `emb_services` run concurrently for **one hour**; after completion and cleanup, all 6 `gitlab_services` then run concurrently for another **one-hour period**. 
 
+#### Example Usage
+
+```bash
+conda run -n exp python src/run/replicate.py 
+```
 
 > **Important Note on Hardware Requirements:**
 > - **Memory**: Our original experiments utilized a machine with **120 GB of RAM**, which was just sufficient for concurrently running all 6 `gitlab_services`. If your machine has less available memory, you should consider reducing the number of simultaneous services.
 > - **Disk Space**: Recording all requests, logs, coverage data, and bug detection information consumes substantial storage space. In our experiments, the total size of generated raw data of 30 runs reached approximately **1.6 TB**. Ensure your system has at least **1.6 TB** of free disk space available to fully replicate the experimental results.
 
-#### Example Usage
 
-```bash
-# 1) Check if your environment can properly launch the SUT
-poetry run python src/run/services.py check
-
-# 2) Run an SUT named 'myDemo' on port 8080, storing logs in 'logs/'
-poetry run python src/run/services.py run \
-  --sut myDemo \
-  --port 8080 \
-  --output-dir logs
-```
 
 #### Reduce the Number of Simultaneous Services
 
@@ -180,7 +161,7 @@ def rq1_and_rq2():
 To reduce the number of simultaneous services, you can split the list of services into smaller batches. For instance:
 
 ```python
-def rq1_and_rq2():
+def rq1_and_rq2(result_dir):
     # Select tools except 'emrest-random' and 'emrest-noretry'
     selected_tools = [t for t in TOOLS if t not in ['emrest-random', 'emrest-noretry']]
 
@@ -212,3 +193,83 @@ def rq1_and_rq2():
 ```
 
 ## Collect and Analyze Experiment Results
+After running the experiments, the raw result data will be saved in the `result_dir` specified as the input argument to the `rq1_and_rq2` and `rq3` functions in `replicate.py`.
+
+The structure of result_dir is as follows:
+```txt
+result_dir/
+├── emrest/               # Results of EmRest across all runs
+│   ├── round1/           # Raw data from the 1st run
+│   ├── round2/           # Raw data from the 2nd run
+│   ├── round3/           # ...
+│   └── ...               
+├── arat-rl/              # Results of ARAT-RL baseline 
+│   ├── round1/
+│   ├── round2/
+│   ├── round3/
+│   └── ...
+├── evomaster/            # Results of EvoMaster baseline
+│   └── ...
+
+```
+
+Each subdirectory under `result_dir` corresponds to a testing approach and contains multiple `roundX/` folders, where each folder stores the logs, monitored HTTP requests and responses, code coverage, and other raw execution results of one experimental run.
+
+### Aggregate Results for Analysis
+You can use the script `src/analyse/collect.py` to aggregate the raw experimental results into structured `csv` data for further analysis (e.g., operation coverage and bug detection metrics). This script also uses the Click library to support CLI commands.
+
+```bash
+conda run -n exp python -m src.analyse.collect -i result_dir -o data_dir 
+```
+
+**Parameters**:
+- `result_dir`: The root directory containing raw experimental outputs (as shown above).
+
+- `data_dir`: The target directory where the aggregated analysis results (e.g., .csv, .json) will be stored for plotting and table generation in the paper.
+
+After running the collect.py script, the aggregated analysis results will be saved in the specified data_dir. The structure of data_dir mirrors that of result_dir, but it contains parsed and structured data instead of raw logs.
+
+```txt
+data_dir/
+├── emrest/                         # Aggregated results of EmRest across all runs
+│   ├── round1/                     # Aggregated data from run 1
+│   │   ├── coverage_and_bug.csv     # Key metrics per SUT: op coverage, bug count, line coverage
+│   │   ├── request_info.csv         # All HTTP requests and status info (one row per request)
+│   │   ├── scs_bug.json             # Unique bugs detected for SUT `scs`
+│   │   ├── gitlab-commit_bug.json
+│   │   └── ...
+│   ├── round2/
+│   ├── round3/
+│   ├── ...
+│   └── result.html                # Summary report: average metrics across all rounds
+├── arat-rl/
+│   ├── round1/
+│   ├── round2/
+│   └── ...
+├── evomaster/
+│   └── ...
+└── ...
+```
+
+**File Descriptions**
+- `coverage_and_bug.csv`:  For each SUT in the run, records key metrics such as:
+    - Number of operations covered
+    - Number of unique bugs found
+    - Line coverage (if available)
+- `request_info.csv`: Contains all HTTP requests sent in the run, with corresponding:
+    - Status code
+    - Status code class (2xx, 4xx, etc.)
+    - Request metadata
+- `xxx_bug.json`: Stores the set of unique bugs detected for each SUT, used for comparison across tools.
+- `result.html`: An auto-generated report that summarizes the average metrics across all runs, used for paper plotting or final tables.
+
+### Generate Tables, Figures, and Other Data in the Paper
+To reproduce the tables, figures, and analysis results presented in our paper, use the Jupyter notebook `src/analyse/analysis.ipynb` 
+
+In the first cell, set the following variables:
+- `data_dir`: path to the aggregated results directory (i.e., the output from collect.py)
+- `spec_dir`: path to the API specifications, typically api-suts/specifications
+
+After configuration, you can run the notebook cell by cell to regenerate all figures and tables reported in the paper.
+The notebook includes the original outputs from our experiments for reference. You can clear and re-run to verify results or modify for further analysis.
+
