@@ -1,6 +1,6 @@
 # EmRest Experimental Scripts and Replication Instructions
 
-> **Important**: The experiments can only be replicated on a Linux operating system. We specifically recommend CentOS 7, which we used in our study. Our experimental setup involves running 11 testing tools, 16 APIs, and 30 repeated runs per tool–API pair, resulting in a large number of concurrent processes. We rely on the Linux screen command to manage and monitor these processes effectively.
+> **Important**: The experiments can only be replicated on a Linux operating system. We specifically recommend CentOS 7, which we used in our study. Our experimental setup involves running 11 testing tools, 16 APIs, and 30 repeated runs per tool–API pair, resulting in a large number of concurrent processes. We rely on the Linux `screen` command to manage and monitor these processes effectively.
 
 This directory (`api-exp-scripts`) contains all scripts and detailed instructions necessary to replicate the experiments described in our ISSTA 2025 paper, including orchestration of experiments and data analysis.
 
@@ -26,18 +26,18 @@ This directory (`api-exp-scripts`) contains all scripts and detailed instruction
 
 - **`../api-suts`**: Scripts and configurations to build and run the REST APIs under test.
 - **`../api-tools`**: Contains baseline testing tools (`ARAT-RL`, `MINER`, `Morest`, `RestCT`, `Schemathesis`, `EvoMaster`).
-- **`../EmRest_core`**: EmRest tool and its dependencies.
+- **`../EmRest_core`**: The source code of the `EmRest` tool and its dependencies.
 
 ---
 
 ## Prerequisites
 
-Before proceeding, ensure the following software is installed on your Linux system (CentOS 7 is recommended, as it was used in our experiments):
+Before proceeding, ensure the following dependencies are installed on your Linux system (CentOS 7 is recommended, as it was used in our experiments):
 
 - Python 3
 - OpenJDK (versions 1.8, 11, and 17)
-- Maven 3.8.8 
-- Gradle 8.5
+- Maven (we used version 3.8.8 in our experiments) 
+- Gradle (we used version 8.5 in our experiments)
 - Docker and Docker Compose
 - Conda (installation script provided)
 - Poetry (installation script provided)
@@ -71,7 +71,8 @@ We provide installation scripts for Conda and Poetry:
     export PATH=$JAVA_HOME/bin:$PATH
     ```
 - Navigate to the `api-exp-scripts` directory (this directory).
-- Run the script:
+- Open a terminal in this directory and verify that all dependencies have been installed and are accessible, especially the `conda activate` command and the `poetry` command.
+- Run the commands:
     ```bash
     chmod +x setup_all_experiment.sh
     ./setup_all_experiment.sh
@@ -82,7 +83,7 @@ We provide installation scripts for Conda and Poetry:
 
     - Set up baseline testing tools (by calling `setup.sh` in `../api-tools`).
 
-    - Install EmRest in a dedicated Python 3.11 environment (using `Poetry` in `../EmRest_core`).
+    - Set up `EmRest` in a dedicated Python 3.11 environment (using `Poetry` in `../EmRest_core`).
 
     - Set up the experiment scripts (this directory) so you can run them immediately.
 
@@ -138,4 +139,78 @@ Automates the **full experimental process** used in our paper. Among the 16 eval
 
 > **Important Note on Hardware Requirements:**
 > - **Memory**: Our original experiments utilized a machine with **120 GB of RAM**, which was just sufficient for concurrently running all 6 `gitlab_services`. If your machine has less available memory, you should consider reducing the number of simultaneous services.
-> - **Disk Space**: Recording all requests, logs, coverage data, and bug detection information consumes substantial storage space. In our experiments, the total size of generated raw data reached approximately **1.6 TB**. Ensure your system has at least **1.6 TB** of free disk space available to fully replicate the experimental results.
+> - **Disk Space**: Recording all requests, logs, coverage data, and bug detection information consumes substantial storage space. In our experiments, the total size of generated raw data of 30 runs reached approximately **1.6 TB**. Ensure your system has at least **1.6 TB** of free disk space available to fully replicate the experimental results.
+
+#### Example Usage
+
+```bash
+# 1) Check if your environment can properly launch the SUT
+poetry run python src/run/services.py check
+
+# 2) Run an SUT named 'myDemo' on port 8080, storing logs in 'logs/'
+poetry run python src/run/services.py run \
+  --sut myDemo \
+  --port 8080 \
+  --output-dir logs
+```
+
+#### Reduce the Number of Simultaneous Services
+
+If your machine does not have enough memory to run all services in parallel (especially the 6 GitLab-based services), you can reduce the number of services launched at the same time by modifying the experiment script.
+
+For example, in `replicate.py`, the function `rq1_and_rq2()` replicates experiments for RQ1 and RQ2. The original logic is:
+
+```python
+def rq1_and_rq2():
+    # Select tools except 'emrest-random' and 'emrest-noretry'
+    selected_tools = [t for t in TOOLS if t not in ['emrest-random', 'emrest-noretry']]
+
+    # Run the selected tools on ten `emb` services
+    run_tools_on_emb_services(
+        used_tools=selected_tools, 
+        used_services=emb_services, 
+        ...
+    )
+
+    # Run the selected tools on six GitLab services
+    run_tools_on_gitlab_services(
+        used_tools=selected_tools, 
+        used_services=gitlab_services, 
+        ...
+    )
+```
+To reduce the number of simultaneous services, you can split the list of services into smaller batches. For instance:
+
+```python
+def rq1_and_rq2():
+    # Select tools except 'emrest-random' and 'emrest-noretry'
+    selected_tools = [t for t in TOOLS if t not in ['emrest-random', 'emrest-noretry']]
+
+    # Run the selected tools on the first five `emb` services
+    run_tools_on_emb_services(
+        used_tools=selected_tools, 
+        used_services=emb_services[:5], 
+        ...
+    )
+    # Run the selected tools on the last five `emb` services
+    run_tools_on_emb_services(
+        used_tools=selected_tools, 
+        used_services=emb_services[5:], 
+        ...
+    )
+
+    # Run the selected tools on the first three GitLab services
+    run_tools_on_gitlab_services(
+        used_tools=selected_tools, 
+        used_services=gitlab_services[:3], 
+        ...
+    )
+    # Run the selected tools on the last three GitLab services
+    run_tools_on_gitlab_services(
+        used_tools=selected_tools, 
+        used_services=gitlab_services[3:], 
+        ...
+    )
+```
+
+## Collect and Analyze Experiment Results
