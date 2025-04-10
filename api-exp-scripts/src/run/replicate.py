@@ -213,7 +213,7 @@ def run_tools_on_gitlab_services(
             # GitLab requires extra time to initialize
             time.sleep(600)
 
-            gitlab_cov_scripts = os.path.join(Path(__file__).parents[3], "api-suts", "gitlab_cov.py")
+            gitlab_cov_scripts = os.path.join(API_SUTS_FOLD, "gitlab_cov.py")
 
             # Retrieve GitLab tokens for each service
             tokens = {}
