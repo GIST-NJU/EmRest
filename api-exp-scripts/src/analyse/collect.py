@@ -1,42 +1,18 @@
 import json
-import logging
 import os
 import re
 
 import click
 import pandas as pd
 import yaml
-from scipy.stats import mannwhitneyu
 from tqdm import trange
 
-from ..services import API_SUTS_FOLD, gitlab_services, emb_services
-
-# 创建 logger
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)  # 设置最低日志级别为DEBUG，这样INFO和ERROR都会被处理
-
-# 创建 handler 用于写入 error 日志
-error_handler = logging.FileHandler('collect_error.log')
-error_handler.setLevel(logging.ERROR)
-error_formatter = logging.Formatter('%(levelname)s - %(message)s')
-error_handler.setFormatter(error_formatter)
-
-# 创建 handler 用于写入 info 日志
-info_handler = logging.FileHandler('collect_info.log')
-info_handler.setLevel(logging.INFO)
-info_formatter = logging.Formatter('%(levelname)s - %(message)s')
-info_handler.setFormatter(info_formatter)
-
-# 给 logger 添加 handler
-logger.addHandler(error_handler)
-logger.addHandler(info_handler)
+from src.run.services import API_SUTS_FOLD, gitlab_services, emb_services
+from src.run.tools import TOOLS
 
 """
 1. parse a round of data -> Operation Coverage (csv), Bug Detection (csv), and a folder of bug.json for each sut
 """
-
-bug_total = {}
-bug_unique = {}
 
 def get_unique_bug(_sut: str, response: str):
     if "market" in _sut:
@@ -84,8 +60,8 @@ def get_unique_bug(_sut: str, response: str):
             part_b = response[response.find("<b>root cause</b>"):(response.find("</pre><p><b>note") + len("</pre>"))]
             part_b = part_b[:part_b.find("\n")]
             response = part_b
-        else:
-            logger.error(f"Error response match for {response}")
+        else:           
+            print(f"[Warning] Error response match for {response}")
     elif "restcountries" in _sut:
         pass
     elif "genome" in _sut:
@@ -134,11 +110,11 @@ def get_unique_bug(_sut: str, response: str):
     elif "gitlab" in _sut:
         pass
     else:
-        logger.error(f"Error response match for {response}")
+        print(f"[Warning] Error response match for {response}")
     return response.strip()
 
 
-def _get_data(_sut_name: str, spec: str, _proxy: str):
+def _get_data(_sut_name: str, spec: str, _proxy: str) -> tuple[pd.DataFrame, dict, dict]:
     def parse_spec() -> dict:
         with open(spec, "r") as f:
             if spec.endswith(".yaml"):
@@ -213,13 +189,15 @@ def parse_proxy_file(sut: str, proxy_file: str, path_patterns: dict[str, list[st
             return matched[0][0]
         if len(matched) > 0:
             m = sorted(matched, key=lambda x: (len(path_patterns[x[0]]), x[1]))[0]
-            logger.info(f"finding: {_url} -> {matched} -> {m}")
+            # print(f"[Warning] Finding: {_url} -> {matched} -> {m}")
             return m[0]
         else:
-            logger.error(f"{_method}: {_url} not found in spec")
+            # print(f"[Warning] {_method}: {_url} not found in spec")
             return None
 
     def get_cases(_lines: list[str]):
+        bt = {}
+        bu = {}
         data = {"op": [], "status": [], "timestamp": []}
         for k in trange(len(_lines), unit="line", desc=f"Processing mitmproxy log: {sut}"):
             resp_idx = -1
@@ -229,28 +207,27 @@ def parse_proxy_file(sut: str, proxy_file: str, path_patterns: dict[str, list[st
                         resp_idx = idx
                         break
                 if resp_idx == -1:
-                    logger.info(f"Error response line match from line {k}")
+                    # print(f"[Warning] Error response line match from line {k}")
                     continue
 
-                method = _lines[k + 1].strip().replace("Method: ", "").lower()
-                resolved_uri = _lines[k + 2].strip().replace("URL: ", "")
-                request_data = _lines[k + 3].strip().replace("Request Data:", "")
-                timestamp = _lines[resp_idx + 1].strip().replace("Timestamp: ", "")
-                status_code = int(lines[resp_idx + 2].replace("Status Code: ", "").strip())
+                method = _lines[k + 2].strip().replace("Method: ", "").lower()
+                resolved_uri = _lines[k + 3].strip().replace("URL: ", "")
+                timestamp = _lines[resp_idx + 2].strip().replace("Timestamp: ", "")
+                status_code = int(lines[resp_idx + 3].replace("Status Code: ", "").strip())
 
                 target_path = find_target_path(resolved_uri, method)
                 if target_path is None:
-                    logger.warn(f"line {k} -> {method}:{resolved_uri}")
+                    # print(f"[Warning] line {k} -> {method}:{resolved_uri}")
                     continue
 
                 op_id = f"{method}:{target_path}"
 
                 if status_code // 100 == 5:
                     if "gitlab" in sut and status_code == 502:
-                        logger.info(f"skip 502 for {op_id}")
+                        print(f"[Warning] skip 502 for {op_id}")
                         continue
 
-                    response_start = resp_idx + 3
+                    response_start = resp_idx + 4
                     response_end = -1
                     for i in range(response_start, len(lines)):
                         if lines[i].strip() == "========REQUEST========":
@@ -266,152 +243,174 @@ def parse_proxy_file(sut: str, proxy_file: str, path_patterns: dict[str, list[st
                     if not is_reproducible(sut, cleaned_response):
                         continue
 
-                    if op_id not in bug_total[sut].keys():
-                        bug_total[sut][op_id] = 1
+                    if op_id not in bt.keys():
+                        bt[op_id] = 1
                     else:
-                        bug_total[sut][op_id] += 1
+                        bt[op_id] += 1
 
-                    if op_id not in bug_unique[sut].keys():
-                        bug_unique[sut][op_id] = {cleaned_response, }
+                    if op_id not in bu.keys():
+                        bu[op_id] = {cleaned_response, }
                     else:
-                        bug_unique[sut][op_id].add(cleaned_response)
+                        bu[op_id].add(cleaned_response)
                     
                 data["op"].append(op_id)
                 data["status"].append(status_code)
                 data["timestamp"].append(timestamp)
 
-        return data
+        return data, bt, bu
 
     with open(proxy_file, 'r') as f:
         lines = f.readlines()
-    global bug_total, bug_unique
-    proxy_data = get_cases(lines)
+    proxy_data, bug_total, bug_unique = get_cases(lines)
     proxy_df = pd.DataFrame.from_dict(data=proxy_data)
     proxy_df["sut"] = sut
     proxy_df["op_total"] = sum([len(_s) for _s in operations.values()])
-    return proxy_df
+    return proxy_df, bug_total, bug_unique
 
 
 def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
     """
-    :param directory: each sut has its own subdirectory
-
+    :param directory: a round of data, e.g. emrest/round1,
+    :param result_dir: the directory to save the result
     """
-
-    def find_file(name: str):
-        for root, dirs, files in os.walk(directory):
-            for file in files:
-                if file.startswith(f"{name}_") and file.endswith("_proxy.txt"):
-                    return os.path.join(root, file)
-                elif name == "features-service" and file.startswith("feature-services") and file.endswith("_proxy.txt"):
-                    return os.path.join(root, file)
-                elif name == "emb-project" and file.startswith("project") and file.endswith("_proxy.txt"):
-                    return os.path.join(root, file)
+    def find_proxy_file(suffix: str, target_dir: str = None):
+        for file in os.listdir(target_dir):
+            if file.endswith(suffix):
+                return os.path.join(target_dir, file)
         return None
 
-    global bug_total, bug_unique
-    bug_total.clear()
-    bug_unique.clear()
+    def process_request_info() -> pd.DataFrame:
+        # Process df to get summary
+        r_info['status_group'] = pd.cut(r_info['status'], bins=[199, 299, 399, 499, 599], labels=['20X', '30X', '40X', '50X'])
 
-    dir_name = os.path.basename(directory)
+        # Count how many distinct operations (op) have a 20X status code in each experiment (exp_name)
+        exp_op_20x_count = r_info[r_info['status_group'] == '20X'].groupby('sut')['op'].nunique()
+        # Count how many distinct operations have a 20X or 50X status code in each experiment (exp_name)
+        exp_op_20x_50x_count = r_info[r_info['status_group'].isin(['20X', '50X'])].groupby('sut')['op'].nunique()
+        # Count the total tested operations
+        exp_op_count = r_info[['sut', 'op_total']].drop_duplicates()
 
-    df = pd.DataFrame(columns=["sut", "op", "op_total", "status", "timestamp"])
-    suts = emb_services + gitlab_services
-    for sut in suts:
-        proxy_file = find_file(sut.exp_name)
+        # Analyze durations
+        # Convert 'timestamp' column to the index
+        r_info.set_index('timestamp', inplace=True)
+        r_info.index = pd.to_datetime(r_info.index)
+
+        # Group by 'sut' and calculate the duration as the difference between max and min timestamps
+        durations = r_info.groupby('sut').apply(lambda x: x.index.max() - x.index.min(), include_groups=False)
+
+        # Reset the index
+        durations = durations.reset_index()
+        durations.columns = ['sut', 'duration']
+
+        # Convert duration to seconds
+        durations['duration'] = durations['duration'].dt.total_seconds()
+
+        # Merge result DataFrames
+        # Merge exp_op_20x_count and exp_op_20x_50x_count
+        merged_df = pd.merge(exp_op_20x_count, exp_op_20x_50x_count, on='sut', how='outer')
+        merged_df = pd.merge(merged_df, exp_op_count, on='sut', how='outer')
+        merged_df = pd.merge(merged_df, durations, on='sut', how='outer')
+
+        # Merge bug data
+        merged_df = pd.merge(merged_df, pd.DataFrame(bug_info_list), on='sut', how='outer')
+
+        # Fill missing values with 0 (assuming NaN represents no corresponding value)
+        merged_df = merged_df.infer_objects(copy=False).fillna(0)
+        merged_df.columns = ['SUT', 'Op_20X', 'Op_20X_50X', 'Op_All', 'Duration', 'Total Bugs', 'Unique Bugs']
+
+        # Keep all numeric data with two decimal places
+        reformat_merged_df = merged_df.map(lambda x: '{:.2f}'.format(x) if isinstance(x, (int, float)) else x)
+
+        # Save final CSV files
+        result_csv = os.path.join(result_dir, "coverage_and_bug.csv")
+        reformat_merged_df.to_csv(result_csv, index=False)
+
+        df_csv = os.path.join(result_dir, "request_info.csv")
+        r_info.to_csv(df_csv, index=True)
+        return merged_df
+
+
+    r_info = pd.DataFrame(columns=["sut", "op", "op_total", "status", "timestamp"])
+    bug_info_list = {"sut": [], "total_bugs": [], "unique_bugs": []}  
+    for sut in emb_services + gitlab_services:
+        sut_fold = os.path.join(directory, sut.exp_name)
+        if not os.path.exists(sut_fold):
+            continue
+        proxy_file = find_proxy_file("_proxy.txt", sut_fold)
         if proxy_file is None:
             continue
-        bug_total[sut.exp_name] = {}
-        bug_unique[sut.exp_name] = {}
-
         spec_file = os.path.join(API_SUTS_FOLD, sut.spec_file_v3)
+        request_info, bug_total, bug_unique = _get_data(sut.exp_name, spec_file, proxy_file)
+        r_info = pd.concat([r_info, request_info], ignore_index=True)
+        bug_info_list['sut'].append(sut.exp_name)
+        bug_info_list['total_bugs'].append(sum(bug_total.values()))
+        bug_info_list['unique_bugs'].append(sum(len(bug_unique[_s]) for _s in bug_unique.keys()))
 
-        df = pd.concat([df, _get_data(sut.exp_name, spec_file, proxy_file)], ignore_index=True)
+        bu_file = os.path.join(result_dir, f"{sut.exp_name}_bug.json")
+        if not os.path.exists(bu_file):
+            with open(bu_file, "w") as f:
+                json.dump({k: list(v) for k, v in bug_unique.items()}, f, indent=4)
 
-    # process df to get summary
-    df['status_group'] = pd.cut(df['status'], bins=[199, 299, 399, 499, 599], labels=['20X', '30X', '40X', '50X'])
-    # 计算每个实验(exp_name)下有20X状态码的op数量
-    exp_op_20x_count = df[df['status_group'] == '20X'].groupby('sut')['op'].nunique()
-    # 计算每个实验(exp_name)下有20X和50X状态码的op数量
-    exp_op_20x_50x_count = df[df['status_group'].isin(['20X', '50X'])].groupby('sut')['op'].nunique()
-    # 计算测试的op数量
-    exp_op_count = df[['sut', 'op_total']].drop_duplicates()
+    return process_request_info()
 
-    # 持续时间
-    # 将 'timestamp' 列设为索引
-    df.set_index('timestamp', inplace=True)
-    df.index = pd.to_datetime(df.index)
-    # 按 'sut' 分组，计算每个组的持续时间
-    durations = df.groupby('sut').apply(lambda x: x.index.max() - x.index.min(), include_groups=False)
-    # 重新设置索引
-    durations = durations.reset_index()
-    durations.columns = ['sut', 'duration']
-    # 将持续时间以秒为单位表示
-    durations['duration'] = durations['duration'].dt.total_seconds()
+def handle_single_round(directory: str, result_dir: str) -> pd.DataFrame:
+    """
+    :param directory: a round of data, e.g. emrest/round1
+    :param result_dir: the directory to save the result
+    :return:
+    """
+    return get_operation_coverage_and_bug_detection(directory, result_dir)
 
-    # 统计bug
-    bug_info_list = {"sut": [], "total_bugs": [], "unique_bugs": []}  # 用于存储结果的列表
-    for sut in df.sut.unique():
-        total = sum(bug_total[sut].values())
-        unique = sum(len(bug_unique[sut][_s]) for _s in bug_unique[sut].keys())
+def handle_multiple_rounds(directory: str, output: str):
+    """
+    directory
+    |__emrest
+        |__round1
+        |__round2
+        |__round3
+        |__...
+    |__arat-rl
+        |__round1
+        |__round2
+        |__round3
+        |__...
+    |__...
+    """
+    for t in TOOLS:
+        dfs = []
+        tool_folder = os.path.join(directory, t)
+        if not os.path.exists(tool_folder):
+            continue
+        result_dir = os.path.join(output, t)
+        if not os.path.exists(result_dir):
+            os.makedirs(result_dir)
+        for r in range(1, 31):
+            round_folder = os.path.join(tool_folder, f"round{r}")
+            if not os.path.exists(round_folder):
+                continue
+            print(f"Processing {tool_folder} round {r}")
+            round_output = os.path.join(result_dir, f"round{r}")
+            if not os.path.exists(round_output):
+                os.makedirs(round_output)
+            child_df = handle_single_round(round_folder, round_output)
+            if child_df.size > 0:
+                dfs.append(child_df)
 
-        bug_info_list["sut"].append(sut)
-        bug_info_list["total_bugs"].append(total)
-        bug_info_list["unique_bugs"].append(unique)
+        df = pd.concat(dfs, ignore_index=True)
 
-        bug_file = os.path.join(result_dir, dir_name, f"{sut}_bug.json")
-        os.makedirs(os.path.dirname(bug_file), exist_ok=True)
-        with open(bug_file, "w") as fp:
-            json.dump({k: list(v) for k, v in bug_unique[sut].items()}, fp)
-
-
-    # merge result df
-    # 合并 exp_op_20x_count 和 exp_op_20x_50x_count
-    merged_df = pd.merge(exp_op_20x_count, exp_op_20x_50x_count, on='sut', how='outer')
-    merged_df = pd.merge(merged_df, exp_op_count, on='sut', how='outer')
-    merged_df = pd.merge(merged_df, durations, on='sut', how='outer')
-    # 合并 bug 数据
-    merged_df = pd.merge(merged_df, pd.DataFrame(bug_info_list), on='sut', how='outer')
-
-    # 填充缺失值为 0（假设 NaN 表示没有对应的值）
-    merged_df = merged_df.infer_objects(copy=False).fillna(0)
-    merged_df.columns = ['SUT', 'Op_20X', 'Op_20X_50X', 'Op_All', 'Duration', 'Total Bugs', 'Unique Bugs']
-
-    # 保留所有数据两位小数
-    reformat_merged_df = merged_df.map(lambda x: '{:.2f}'.format(x) if isinstance(x, (int, float)) else x)
-
-    result_csv = os.path.join(result_dir, dir_name, "coverage_and_bug.csv")
-    reformat_merged_df.to_csv(result_csv, index=False)
-    df_csv = os.path.join(result_dir, dir_name, "request_info.csv")
-    df.to_csv(df_csv, index=True)
-
-    return merged_df
-
-def handle_multiple_results(directory: str, result_dir: str):
-    dfs = []
-    for sub_dir in os.listdir(directory):
-        sub_dir_path = os.path.join(directory, sub_dir)
-        if os.path.isdir(sub_dir_path):
-            child = get_operation_coverage_and_bug_detection(sub_dir_path, result_dir)
-            if child.size > 0:
-                dfs.append(child)
-
-    df = pd.concat(dfs, ignore_index=True)
-
-    # group by SUT and calculate the mean of each column
-    grouped = df.groupby('SUT').agg(
-        Op_20X_mean=('Op_20X', 'mean'),
-        Op_20X_50X_mean=('Op_20X_50X', 'mean'),
-        Op_All=('Op_All', 'mean'),
-        Duration=('Duration', 'mean'),
-        Total_Bugs_mean=('Total Bugs', 'mean'),
-        Unique_Bugs_mean=('Unique Bugs', 'mean'),
-        Count=('Unique Bugs', 'size')
-    )
-    logger.info(grouped.to_string(index=True))
-    print(grouped.to_string(index=True))
-    result_csv = os.path.join(result_dir, "result.html")
-    grouped.to_html(result_csv, escape=False, render_links=True)
+        # group by SUT and calculate the mean of each column
+        grouped = df.groupby('SUT').agg(
+            Op_20X_mean=('Op_20X', 'mean'),
+            Op_20X_50X_mean=('Op_20X_50X', 'mean'),
+            Op_All=('Op_All', 'mean'),
+            Duration=('Duration', 'mean'),
+            Total_Bugs_mean=('Total Bugs', 'mean'),
+            Unique_Bugs_mean=('Unique Bugs', 'mean'),
+            Count=('Unique Bugs', 'size')
+        )
+        print(grouped.to_string(index=True))
+        result_csv = os.path.join(result_dir, "result.html")
+        grouped.to_html(result_csv, escape=False, render_links=True)
 
 @click.command()
 @click.option('-i', '--directory', type=str, help='input directory')
@@ -431,7 +430,7 @@ def parse(directory: str, output: str):
         |__...
     |__...
     """
-    handle_multiple_results(directory, output)
+    handle_multiple_rounds(directory, output)
 
 
 if __name__ == "__main__":
