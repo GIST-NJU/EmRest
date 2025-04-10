@@ -227,7 +227,7 @@ conda run -n exp python -m src.analyse.collect -i result_dir -o data_dir
 
 - `data_dir`: The target directory where the aggregated analysis results (e.g., .csv, .json) will be stored for plotting and table generation in the paper.
 
-After running the collect.py script, the aggregated analysis results will be saved in the specified data_dir. The structure of data_dir mirrors that of result_dir, but it contains parsed and structured data instead of raw logs.
+After running the `collect.py` script, the aggregated analysis results will be saved in the specified data_dir. The structure of data_dir mirrors that of result_dir, but it contains parsed and structured data instead of raw logs.
 
 ```txt
 data_dir/

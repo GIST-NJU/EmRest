@@ -1,64 +1,39 @@
 # EmRest: Effective REST APIs Testing with Error Message Analysis
 
-**EmRest** is a black-box testing tool that leverages error message analysis to enhance the generation of both valid and exceptional test inputs for REST APIs.  This repository contains its implementation.
+`EmRest` is a black-box testing tool that leverages error message analysis to enhance the generation of both valid and exceptional test inputs for REST APIs. This repository contains its full implementation and setup for reproducibility.
 
 ---
 
 ## Repository Structure
 
-- `lib/`  
-Contains the [PICT](https://github.com/microsoft/pict) executable, which is used by EmRest to generate test cases. This folder provides precompiled PICT binaries for macOS and Linux. For Windows, please refer to [lib/README.md](lib/README.md) for instructions to build PICT from source.
+- `lib/` contains:
 
-- `src/`  
-  Contains the Python source code of EmRest. The entry point of the system is in `alg.py`.
+  - Precompiled the [PICT](https://github.com/microsoft/pict) binaries for test case generation (macOS and Linux).
+  - A local wheel file for installing the `SpaCy` language model `en_core_web_sm` without internet access.
 
-- `pyproject.toml` and `poetry.lock`  
-  Project dependency and build configuration files for [Poetry](https://python-poetry.org/), used to manage Python environments and dependencies.
 
----
+- `src/` contains the Python source code of EmRest. The entry point of the system is in `alg.py`.
+- `setup.sh`: a one-click script that creates the conda environment, installs dependencies, and sets everything up.
 
 ## Prerequisites
+To run EmRest, make sure you have:
 
-To use EmRest, you’ll need:
+- conda (either Miniconda or Anaconda), we provide a script to install Miniconda in [api-exp-scripts/install_conda.sh](../api-exp-scripts/install_conda.sh)
 
-- **Python ≥ 3.11** (we use Python 3.11.11)
-- **Poetry** for dependency and environment management
-- EmRest has been tested on macOS and Linux, and we recommend using one of these platforms.  Windows is currently not officially supported and has not been thoroughly tested.
----
-
-## Installation
-
-### 1. Install `Poetry`
-
+## Setup
+Run `setup.sh`
 ```bash
-curl -sSL https://install.python-poetry.org | python3 -
+chmod +x setup.sh
+./setup.sh
 ```
-Then, add the Poetry binary path to your shell configuration file (e.g., `~/.bashrc`, `~/.zshrc`, or `~/.profile`):
+This will:
 
+- Create a conda environment named emrest (with Python 3.11)
 
-### 2. **Create and Activate Virtual Environment with Poetry**
+- Install all dependencies (from requirements.txt)
 
-First, navigate to the root directory of the project (where `pyproject.toml` is located):
+- Install the `en_core_web_sm` SpaCy model from `lib/` locally
 
-```bash
-cd /path/to/EmRest_Core
-```
-
-Then run:
-
-```bash
-poetry env use python3.11
-poetry install 
-```
-This will create a virtual environment and install all required dependencies.
-
-### 3. **Install the SpaCy model for constraint extraction:**
-
-EmRest uses [SpaCy](https://spacy.io/) for natural language processing tasks, such as extracting error messages from HTTP responses. To download the required language model, run:
-
-```bash
-poetry run python -m spacy download en_core_web_sm
-```
 
 ## Usage Instructions
 
@@ -71,13 +46,13 @@ cd /path/to/EmRest_core
 ### 2. **View help information for available commands and options:**
 
 ```bash
-poetry run python -m src.algorithms --help
+conda run -n emrest python -m src.algorithms --help
 ```
 
 ### 3. **Run the tool with the following command:**
 
 ```bash
-poetry run python -m src.algorithms \
+conda run -n emrest python -m src.algorithms \
     --exp_name example_exp \
     --spec_file path/to/api_spec.yaml \
     --budget 60 \
@@ -108,7 +83,7 @@ poetry run python -m src.algorithms \
 To run EmRest on the BookStore API specification (hosted at `http://localhost:8080/v2` on a Linux system), with a time budget of 3600 seconds (1 hour), use the following command:
 
 ```bash
-poetry run python -m emrest_core.algorithms \
+conda run -n emrest python -m emrest_core.algorithms \
     --exp_name test \
     --spec_file ./specifications/BookStoreAPI.json \
     --budget 3600 \
@@ -122,5 +97,4 @@ poetry run python -m emrest_core.algorithms \
 
 ## Replicate Study
 
-EmRest has been accepted at ISSTA 2025.  
-To replicate our experiments, please refer to the [Replication Tutorial](../api-exp-scripts/README.md) for detailed instructions.
+EmRest has been accepted at ISSTA 2025. To replicate our experiments, please refer to the [Replication Tutorial](../api-exp-scripts/README.md) for detailed instructions.
