@@ -5,6 +5,8 @@ import requests
 import json
 from services import Service, API_SUTS_FOLD, emb_services, gitlab_services, run_emb_service, run_gitlab_service, get_gitlab_token
 from tools import run_tool, TOOLS
+from pathlib import Path
+
 
 def clean_all():
     """
@@ -211,6 +213,8 @@ def run_tools_on_gitlab_services(
             # GitLab requires extra time to initialize
             time.sleep(600)
 
+            gitlab_cov_scripts = os.path.join(Path(__file__).parents[3], "api-suts", "gitlab_cov.py")
+
             # Retrieve GitLab tokens for each service
             tokens = {}
             for s in suts:
@@ -222,7 +226,7 @@ def run_tools_on_gitlab_services(
                 # Start a separate screen session to track runtime coverage
                 # The script 'gitlab_cov.py' presumably collects coverage data in real time
                 subprocess.run(
-                    f"screen -dmS gitlab_{s[0].exp_name}_runtime_cov bash -c 'python {sut_fold}/gitlab_cov.py {os.path.join(temp_dir, s[0].exp_name)} {s[0].exp_name} {s[1]}'",
+                    f"screen -dmS gitlab_{s[0].exp_name}_runtime_cov bash -c 'python {gitlab_cov_scripts} {os.path.join(temp_dir, s[0].exp_name)} {s[0].exp_name} {s[1]}'",
                     shell=True
                 )
 
