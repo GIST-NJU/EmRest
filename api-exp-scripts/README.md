@@ -37,13 +37,11 @@ Before proceeding, ensure the following dependencies are installed on your Linux
 - OpenJDK (versions 1.8, 11, and 17)
 - Maven (we used version 3.8.8 in our experiments) 
 - Gradle (we used version 8.5 in our experiments)
-- Docker and Docker Compose
+- Docker and Docker Compose (pull docker images: `mongo:3.6.2`, `mysql:8.3.0`, `witcan/gitlab-ee-api:latest`)
 - Conda (installation script provided)
 - Python 3 (required for installing `Poetry`)
 - Poetry (installation script provided)
 - Screen (a terminal multiplexer for Linux systems, use `sudo yum install -y screen` to install it on Centos 7)
-
----
 
 ### Provided Installation Scripts
 
@@ -91,7 +89,7 @@ We provide installation scripts for Conda and Poetry:
 Current ditectory (`api-exp-scripts`) uses three Python scripts in the `src/run` directory for orchestrating experiments:
 - **`services.py`**: Manages REST APIs (SUTs).  
 - **`tools.py`**: Manages testing tools (baselines and EmRest).
-- **`replicate.py`**: Automates the **full experimental process** used in our paper
+- **`replicate.py`**: Automates the **full experimental process** used in our paper, by calling functions defined in `services.py` and `tools.py`
 
 ### `tools.py`
 
