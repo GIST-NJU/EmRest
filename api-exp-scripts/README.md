@@ -50,7 +50,7 @@ We provide installation scripts for Conda and Poetry:
 
 ## Step-by-Step Environment Setup
 - Navigate to the `../api-suts` directory and configure your Java paths:
-- Edit files `java8.env`, `java11.env`, and `java17.env` to correctly export JAVA_HOME paths. Example for java8.env:
+- Edit files `java8.env`, `java11.env`, and `java17.env` to correctly export `JAVA_HOME` paths. Example for `java8.env`:
     ```bash
     export JAVA_HOME=/path/to/jdk1.8.0_361
     export PATH=$JAVA_HOME/bin:$PATH
