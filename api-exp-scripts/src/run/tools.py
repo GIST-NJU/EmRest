@@ -34,6 +34,7 @@ def cli():
     """
     pass
 
+
 @cli.command(name="run")
 @click.option('--tool', '-t', required=True,
               type=click.Choice(TOOLS),
@@ -74,14 +75,14 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
             if swaggerV3:
                 return swaggerV3
             else:
-                raise Exception("tool requires swagger in v3 format, but swaggerV3 is not specified")
+                raise Exception("Not Implemented for other tools")
 
     tool = tool.lower()
     validate()
     swagger = choose_swagger_version()
     if not os.path.exists(swagger):
         raise Exception("Swagger file not found: " + str(swagger))
-        
+
     output = Path(output)
     if not output.exists():
         os.mkdir(output)
@@ -145,14 +146,16 @@ def _run_emrest(expName, swagger, budget, output, serverUrl, suffix='', authKey=
         args["--authValue"] = f"Bearer {token}"
 
     # assemble the command
-    cmd = f"cd {emrest_fold} && poetry run python -m src/alg{suffix}.py {' '.join([f'{k} {v}' for k, v in args.items()])} > {output}/runtime.log 2>&1"
+    cmd = f"cd {emrest_fold} && poetry run python src/alg{suffix}.py {' '.join([f'{k} {v}' for k, v in args.items()])} > {output}/runtime.log 2>&1"
     screened = f"screen -dmS emrest{suffix}_{expName} bash -c \"{cmd}\""
     # run the command
     subprocess.run(screened, shell=True)
 
+
 def run_original_emrest(expName, swagger, budget, output, serverUrl, authKey=None, token=None):
     """Original EmRest"""
     _run_emrest(expName, swagger, budget, output, serverUrl, suffix='', authKey=authKey, token=token)
+
 
 def run_emrest_no_retry(expName, swagger, budget, output, serverUrl, authKey=None, token=None):
     """Ablation study: EmRest_NoRetry"""
@@ -161,6 +164,7 @@ def run_emrest_no_retry(expName, swagger, budget, output, serverUrl, authKey=Non
 def run_emrest_infer(expName, swagger, budget, output, serverUrl, authKey=None, token=None):
     """Ablation study: EmRest_Infer"""
     _run_emrest(expName, swagger, budget, output, serverUrl, suffix='_without_mutation', authKey=authKey, token=token)
+
 
 def run_emrest_random_op_selector(expName, swagger, budget, output, serverUrl, authKey=None, token=None):
     """Ablation study: EmRest_Random"""
@@ -171,9 +175,9 @@ def run_arat_rl(expName, swagger, budget, output, serverUrl, token=None):
     main_py = os.path.join(TOOL_ROOT, "ARAT-RL", "main.py")
 
     if token is None:
-        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/runtime.log 2>&1\""
+        run = f"screen -dmS rl_{expName} bash -c \"conda run -n rl python {main_py} {swagger} {serverUrl} {budget} > {output}/runtime.log 2>&1\""
     else:
-        run = f"source activate rl && screen -dmS rl_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} {token} > {output}/runtime.log 2>&1\""
+        run = f"screen -dmS rl_{expName} bash -c \"conda run -n rl python {main_py} {swagger} {serverUrl} {budget} {token} > {output}/runtime.log 2>&1\""
 
     subprocess.run(run, shell=True)
 
@@ -182,9 +186,9 @@ def run_morest(expName, swagger, budget, output, serverUrl, token=None):
     main_py = os.path.join(TOOL_ROOT, "morest", "fuzzer.py")
 
     if token is None:
-        run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} > {output}/runtime.log 2>&1\""
+        run = f"screen -dmS morest_{expName} bash -c \"conda run -n morest python {main_py} {swagger} {serverUrl} {budget} > {output}/runtime.log 2>&1\""
     else:
-        run = f"source activate morest && screen -dmS morest_{expName} bash -c \"python {main_py} {swagger} {serverUrl} {budget} {token} > {output}/runtime.log 2>&1\""
+        run = f"screen -dmS morest_{expName} bash -c \"conda run -n morest python {main_py} {swagger} {serverUrl} {budget} {token} > {output}/runtime.log 2>&1\""
 
     subprocess.run(run, shell=True)
 
@@ -220,9 +224,9 @@ def run_restct(expName, swagger, budget, output, serverUrl, token=None):
     config_args_token = ' '.join([f'{k} {v}' for k, v in config_with_token.items() if v is not None])
 
     if token is not None:
-        run = f"source activate restct && screen -dmS restct_{expName} bash -c \"python {main_py} {config_args_token} > {output}/runtime.log 2>&1\""
+        run = f"screen -dmS restct_{expName} bash -c \"conda run -n restct python {main_py} {config_args_token} > {output}/runtime.log 2>&1\""
     else:
-        run = f"source activate restct && screen -dmS restct_{expName} bash -c \"python {main_py}  {config_args} > {output}/runtime.log 2>&1\""
+        run = f"screen -dmS restct_{expName} bash -c \"conda run -n restct python {main_py}  {config_args} > {output}/runtime.log 2>&1\""
 
     subprocess.run(run, shell=True)
 
@@ -257,9 +261,9 @@ Authorization: Bearer token
 
     miner_home = os.path.join(TOOL_ROOT, "MINER", "restler_bin_atten", "restler", "Restler")
     mkdir = f"mkdir {destination}"
-    compile = f"chmod 777 {miner_home} && {miner_home} compile --api_spec {swagger}"
+    compile = f"chmod 777 {miner_home} && conda run -n miner {miner_home} compile --api_spec {swagger}"
     run_miner = f"{miner_home} fuzz --grammar_file ./Compile/grammar.py --dictionary_file ./Compile/dict.json --settings ./Compile/engine_settings.json --no_ssl --time_budget {budget / 3600} --disable_checkers payloadbody"
-    run = f"chmod 777 {miner_home} && cd {destination} && source activate miner && screen -dmS miner_{expName} bash -c \"{run_miner}\""
+    run = f"chmod 777 {miner_home} && cd {destination} && screen -dmS miner_{expName} bash -c \"conda run -n miner {run_miner}\""
     if token is not None:
         write_token(destination, token)
     subprocess.run(f"rm -rf {destination}", shell=True)
@@ -287,12 +291,13 @@ def run_schemathesis(expName, swagger, budget, output, serverUrl, token=None):
     cli_file = os.path.join(TOOL_ROOT, "Schemathesis", "schemathesis_cli.py")
 
     if token is None:
-        run = f"source activate schemathesis && screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} > {output}/runtime.log 2>&1\""
+        run = f"screen -dmS schemathesis_{expName} bash -c \"conda run -n schemathesis python {cli_file} {expName} {swagger} {serverUrl} {budget} > {output}/runtime.log 2>&1\""
     else:
-        run = f"source activate schemathesis && screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} {token} > {output}/runtime.log 2>&1\""
+        run = f"screen -dmS schemathesis_{expName} bash -c \"conda run -n schemathesis python {cli_file} {expName} {swagger} {serverUrl} {budget} {token} > {output}/runtime.log 2>&1\""
 
     # print(run)
     subprocess.run(run, shell=True)
+
 
 @cli.command(name="check")
 def is_ready():
@@ -349,7 +354,6 @@ def is_ready():
         print("[FAIL] Some tools are not ready. Please check the above errors.")
 
     return success
-
 
 
 if __name__ == "__main__":
