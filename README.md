@@ -13,4 +13,4 @@ EmRest has been accepted at **ISSTA 2025**. This repository contains its impleme
 
 ## Experiment Reproduction Notes
 
-Please refer to `api-exp-scripts/README.md` for instructions on replicating the experiments and reproducing the figures and tables in our paper.
+Please refer to [`api-exp-scripts/README.md`](api-exp-scripts/README.md) for instructions on replicating the experiments and reproducing the figures and tables in our paper.
