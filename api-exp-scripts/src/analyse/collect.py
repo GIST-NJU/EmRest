@@ -38,10 +38,6 @@ logger.addHandler(info_handler)
 bug_total = {}
 bug_unique = {}
 
-case_20X = {}
-case_500 = {}
-
-
 def get_unique_bug(_sut: str, response: str):
     if "market" in _sut:
         response = re.sub(r'For input string:(.*?),"description"', 'For input string: *,"description"', response)
@@ -279,31 +275,7 @@ def parse_proxy_file(sut: str, proxy_file: str, path_patterns: dict[str, list[st
                         bug_unique[sut][op_id] = {cleaned_response, }
                     else:
                         bug_unique[sut][op_id].add(cleaned_response)
-
-                    if op_id not in case_500[sut].keys():
-                        case_500[sut][op_id] = {}
-                    if cleaned_response not in case_500[sut][op_id]:
-                        case_500[sut][op_id][cleaned_response] = []
-                    case_500[sut][op_id][cleaned_response].append({
-                        "method": method,
-                        "url": resolved_uri,
-                        "request_data": request_data,
-                        "status_code": status_code,
-                        "response": response
-                    })
-
-                elif status_code // 100 == 2:
-
-                    if op_id not in case_20X[sut].keys():
-                        case_20X[sut][op_id] = []
-
-                    case_20X[sut][op_id].append({
-                        "method": method,
-                        "url": resolved_uri,
-                        "request_data": request_data,
-                        "status_code": status_code
-                    })
-
+                    
                 data["op"].append(op_id)
                 data["status"].append(status_code)
                 data["timestamp"].append(timestamp)
@@ -312,7 +284,7 @@ def parse_proxy_file(sut: str, proxy_file: str, path_patterns: dict[str, list[st
 
     with open(proxy_file, 'r') as f:
         lines = f.readlines()
-    global bug_total, bug_unique, case_500, case_20X
+    global bug_total, bug_unique
     proxy_data = get_cases(lines)
     proxy_df = pd.DataFrame.from_dict(data=proxy_data)
     proxy_df["sut"] = sut
@@ -337,11 +309,9 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
                     return os.path.join(root, file)
         return None
 
-    global bug_total, bug_unique, case_500, case_20X
+    global bug_total, bug_unique
     bug_total.clear()
     bug_unique.clear()
-    case_500.clear()
-    case_20X.clear()
 
     dir_name = os.path.basename(directory)
 
@@ -353,8 +323,6 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
             continue
         bug_total[sut.exp_name] = {}
         bug_unique[sut.exp_name] = {}
-        case_20X[sut.exp_name] = {}
-        case_500[sut.exp_name] = {}
 
         spec_file = os.path.join(API_SUTS_FOLD, sut.spec_file_v3)
 
@@ -419,64 +387,7 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
 
     return merged_df
 
-
-def comparison(original):
-    # Function to format numbers to two decimal places, show the difference, and add colored arrows
-    def format_with_diff_and_arrows(original_val, to_compare_val):
-        diff = original_val - to_compare_val
-        arrow = '↑' if diff >= 0 else '↓'
-        color = 'red' if diff >= 0 else 'green'
-        return f"{original_val} ({diff:+.2f}) <span style='color:{color}'>{arrow}</span>"
-
-    to_compare = {
-        "SUT": ["features-service",
-                "genome-nexus",
-                "languagetool",
-                "market",
-                "ncs",
-                "person-controller",
-                "emb-project",
-                "restcountries",
-                "scs",
-                "user-management",
-                "gitlab-branch",
-                "gitlab-commit",
-                "gitlab-groups",
-                "gitlab-issues",
-                "gitlab-project",
-                "gitlab-repository"],
-        "Op_20X_BM": [17.8, 23, 2, 1, 6, 8, 42.1, 21.8, 11, 12, 7.4, 3.0, 8.3, 22.3, 19.0, 3.4],
-        "Op_20X_50X_BM": [18, 23, 2, 8, 6, 12, 46.2, 21.8, 11, 20.5, 7.4, 3.0, 8.6, 22.5, 19.9, 3.4],
-        "Unique_Bugs_BM": [34.2, 0, 12.5, 29.4, 0, 127.6, 15.3, 1, 0, 17.1, 0, 2, 5, 16, 2, 0]
-    }
-
-    to_compare = pd.DataFrame(to_compare)
-
-    compare_df = pd.merge(original, to_compare, on='SUT')
-    for col in ["Op_20X", "Op_20X_50X", "Unique_Bugs"]:
-        compare_df[col] = compare_df.apply(
-            lambda row: format_with_diff_and_arrows(row[f'{col}_mean'], row[f'{col}_BM']),
-            axis=1
-        )
-
-    compare_df = compare_df[['SUT', 'Op_20X', 'Op_20X_50X', 'Op_All', 'Duration', 'Total_Bugs_mean', 'Unique_Bugs', 'Count']]
-
-    # Define the styles with borders
-    styles = [
-        {'selector': 'th', 'props': 'border: 1px solid black;'},
-        {'selector': 'td', 'props': 'border: 1px solid black; text-align: center;'}
-    ]
-
-    # Display the DataFrame with HTML formatting and export to an HTML file
-    compare_df = compare_df.style.set_table_styles(styles).format({
-        'Op_20X_mean': lambda x: x,
-        'Op_20X_50X_mean': lambda x: x,
-        'Unique_Bugs_mean': lambda x: x
-    })
-    return compare_df
-
-
-def handle_multiple_results(directory: str, result_dir: str, with_comparison: bool = False):
+def handle_multiple_results(directory: str, result_dir: str):
     dfs = []
     for sub_dir in os.listdir(directory):
         sub_dir_path = os.path.join(directory, sub_dir)
@@ -499,147 +410,29 @@ def handle_multiple_results(directory: str, result_dir: str, with_comparison: bo
     )
     logger.info(grouped.to_string(index=True))
     print(grouped.to_string(index=True))
-    if with_comparison:
-        grouped = comparison(grouped)
-
     result_csv = os.path.join(result_dir, "result.html")
     grouped.to_html(result_csv, escape=False, render_links=True)
 
-
-def compute_p_values(a_directory: str, b_directory: str):
-    a_dfs = []
-    b_dfs = []
-    for root, dirs, files in os.walk(a_directory):
-        for file in files:
-            if file == "coverage_and_bug.csv":
-                df = pd.read_csv(os.path.join(root, file))
-                a_dfs.append(df)
-    for root, dirs, files in os.walk(b_directory):
-        for file in files:
-            if file == "coverage_and_bug.csv":
-                df = pd.read_csv(os.path.join(root, file))
-                b_dfs.append(df)
-
-    # Concatenate all dataframes in the lists
-    a_df = pd.concat(a_dfs, ignore_index=True)
-    b_df = pd.concat(b_dfs, ignore_index=True)
-    # Perform the t-test for each column
-    sut_list = a_df['SUT'].unique()
-
-    p_values = {}
-    for sut in sut_list:
-        a_sut = a_df[a_df['SUT'] == sut]
-        b_sut = b_df[b_df['SUT'] == sut]
-
-        p_values[sut] = {}
-        for column in ['Op_20X', 'Op_20X_50X', 'Unique Bugs']:
-            stat, p_value = mannwhitneyu(a_sut[column], b_sut[column], alternative='two-sided')
-            p_values[sut][column] = p_value < 0.05
-
-    # Convert the p-values dictionary to a DataFrame
-    p_values_df = pd.DataFrame(p_values).T
-    return p_values_df
-
-
-@click.group()
-def cli():
-    pass
-
-
-@cli.command()
+@click.command()
 @click.option('-i', '--directory', type=str, help='input directory')
 @click.option('-o', '--output', type=str, help='output directory')
-@click.option('-c', "--with_comparison", is_flag=True, help="With comparison")
-def parse(directory: str, output: str, with_comparison: bool):
-    handle_multiple_results(directory, output, with_comparison)
-
-
-@cli.command()
-@click.option('-a', help='target a')
-@click.option('-b', help='target b')
-@click.option('-o', help='output directory')
-def compare(a: str, b: str, o: str):
-    with open(a, 'r') as fp:
-        a_data = json.load(fp)
-    with open(b, 'r') as fp:
-        b_data = json.load(fp)
-
-    # Create a set of all unique (API, error_message) pairs
-    api_error_pairs = set()
-    for api, errors in a_data.items():
-        for error in errors:
-            api_error_pairs.add((api, error))
-    for api, errors in b_data.items():
-        for error in errors:
-            api_error_pairs.add((api, error))
-
-    # Create a DataFrame with a MultiIndex (API, error_message)
-    index = pd.MultiIndex.from_tuples(api_error_pairs, names=['API', 'Error Message'])
-    df = pd.DataFrame(index=index, columns=['A', 'B'])
-
-    # Define symbols for presence (red check mark) and absence (green cross mark)
-    symbols = {
-        'present': '<span style="color:red">✔</span>',
-        'absent': '<span style="color:green">✘</span>'
-    }
-
-    # Populate the DataFrame
-    for api, error in api_error_pairs:
-        df.at[(api, error), 'A'] = symbols['present'] if error in a_data.get(api, []) else symbols['absent']
-        df.at[(api, error), 'B'] = symbols['present'] if error in b_data.get(api, []) else symbols['absent']
-
-    # Define the styles with borders
-    styles = [
-        {'selector': 'th', 'props': 'border: 1px solid black;'},
-        {'selector': 'td', 'props': 'border: 1px solid black;'}
-    ]
-
-    os.makedirs(o, exist_ok=True)
-
-    # Display the DataFrame with HTML formatting and export to an HTML file
-    df.style.set_table_styles(styles).format({
-        'A': lambda x: x,
-        'B': lambda x: x
-    }).to_html(os.path.join(o, "ab_diff.html"), render_links=True, escape=False)
-
-
-@cli.command()
-@click.option('-p', '--path', help='the directory of all data groups')
-@click.option('-o', help='the result directory')
-def p_values(path: str, o: str):
-    emfrest_emb = os.path.join(path, 'emfrest_emb')
-    emfrest_gitlab = os.path.join(path, 'emfrest_gitlab')
-    if not os.path.exists(emfrest_emb) or not os.path.exists(emfrest_gitlab):
-        raise FileNotFoundError('emfrest_emb or emfrest_gitlab not found')
-
-    results = []
-    for sub_dir in os.listdir(path):
-        if sub_dir == "emfrest_emb" or sub_dir == "emfrest_gitlab" or sub_dir.split('_')[-1] not in ['emb', 'gitlab']:
-            continue
-        if sub_dir.split('_')[-1] == 'emb':
-            child_df = compute_p_values(emfrest_emb, os.path.join(path, sub_dir))
-        else:
-            child_df = compute_p_values(emfrest_gitlab, os.path.join(path, sub_dir))
-        child_df['tool'] = sub_dir
-        # reset index
-        child_df.reset_index(inplace=True)
-        results.append(child_df)
-
-    df = pd.concat(results, ignore_index=True)
-    # rename column index to sut
-    df.rename(columns={'index': 'sut'}, inplace=True)
-
-    unique_tool_count = df.groupby('sut')['tool'].nunique().reset_index()
-    # check whether all tools equal to 4
-    if not unique_tool_count['tool'].eq(4).all():
-        raise ValueError('Not all tools equal to 4')
-    df_ablation = df[df['tool'].isin(['emfrest_abltion_gitlab', 'emfrest_abltion_emb'])][['sut', 'Op_20X', 'Op_20X_50X', 'Unique Bugs']]
-    df_non_ablation = df[~df['tool'].isin(['emfrest_abltion_gitlab', 'emfrest_abltion_emb'])][['sut', 'Op_20X', 'Op_20X_50X', 'Unique Bugs']]
-
-    df_ablation.groupby('sut').agg(lambda x: x.all() if x.dtype == bool else x.iloc[0]).reset_index().to_csv(os.path.join(o, 'ablation.csv'))
-    df_non_ablation.groupby('sut').agg(lambda x: x.all() if x.dtype == bool else x.iloc[0]).reset_index().to_csv(os.path.join(o, 'non_ablation.csv'))
-    df.to_csv(os.path.join(o, 'pValue.csv'))
+def parse(directory: str, output: str):
+    """
+    directory
+    |__emrest
+        |__round1
+        |__round2
+        |__round3
+        |__...
+    |__arat-rl
+        |__round1
+        |__round2
+        |__round3
+        |__...
+    |__...
+    """
+    handle_multiple_results(directory, output)
 
 
 if __name__ == "__main__":
-    cli()
+    parse()
