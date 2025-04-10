@@ -46,13 +46,13 @@ cd /path/to/EmRest_core
 ### 2. **View help information for available commands and options:**
 
 ```bash
-conda run -n emrest python -m src.algorithms --help
+conda run -n emrest python -m src.alg --help
 ```
 
 ### 3. **Run the tool with the following command:**
 
 ```bash
-conda run -n emrest python -m src.algorithms \
+conda run -n emrest python -m src.alg \
     --exp_name example_exp \
     --spec_file path/to/api_spec.yaml \
     --budget 60 \
@@ -83,7 +83,7 @@ conda run -n emrest python -m src.algorithms \
 To run EmRest on the BookStore API specification (hosted at `http://localhost:8080/v2` on a Linux system), with a time budget of 3600 seconds (1 hour), use the following command:
 
 ```bash
-conda run -n emrest python -m emrest_core.algorithms \
+conda run -n emrest python -m src.alg \
     --exp_name test \
     --spec_file ./specifications/BookStoreAPI.json \
     --budget 3600 \
