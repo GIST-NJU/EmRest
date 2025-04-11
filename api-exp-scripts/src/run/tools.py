@@ -48,8 +48,6 @@ def cli():
 @click.option('--authKey', '-ak', help='the key of the authorization header')
 @click.option('--token', help='the token of gitlab')
 def run_cli(tool, expname, swaggerv2, swaggerv3, budget, output, serverurl, authkey, token):
-    print(f"Running {tool} on {expname} with budget {budget} seconds")
-    p
     run_tool(tool, expname, swaggerv2, swaggerv3, budget, output, serverurl, authkey, token)
 
 
