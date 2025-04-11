@@ -387,10 +387,7 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
         merged_df = merged_df.infer_objects(copy=False).fillna(0)
         merged_df.columns = ['SUT', 'Op_20X', 'Op_20X_50X', 'Op_All', 'Duration', 'Total Bugs', 'Unique Bugs']
 
-        # Keep all numeric data with two decimal places
-        reformat_merged_df = merged_df.map(lambda x: '{:.2f}'.format(x) if isinstance(x, (int, float)) else x)
-
-        # if line coverage is available, add it to the DataFrame
+         # if line coverage is available, add it to the DataFrame
         if len(line_coverages['sut']) > 0:
             line_coverage_df = pd.DataFrame(line_coverages)
             line_coverage_df = line_coverage_df.rename(columns={
@@ -398,9 +395,13 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
                 "covered_lines": "Covered Lines",
                 "line_coverage": "Line Coverage"
             })
-            reformat_merged_df = pd.merge(reformat_merged_df, line_coverage_df, on='SUT', how='outer')
-            reformat_merged_df['Covered Lines'] = reformat_merged_df['Covered Lines'].astype(int)
-            reformat_merged_df['Line Coverage'] = reformat_merged_df['Line Coverage'].astype(float)
+
+            merged_df = merged_df.merge(line_coverage_df, on='SUT', how='outer')
+            merged_df['Covered Lines'] = merged_df['Covered Lines'].astype(int)
+            merged_df['Line Coverage'] = merged_df['Line Coverage'].astype(float)
+
+        # Keep all numeric data with two decimal places
+        reformat_merged_df = merged_df.map(lambda x: '{:.2f}'.format(x) if isinstance(x, (int, float)) else x)
 
         # Save final CSV files
         result_csv = os.path.join(result_dir, "coverage_and_bug.csv")
@@ -408,7 +409,7 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
 
         df_csv = os.path.join(result_dir, "request_info.csv")
         r_info.to_csv(df_csv, index=True)
-        return reformat_merged_df
+        return merged_df
 
 
     r_info = pd.DataFrame(columns=["sut", "op", "op_total", "status", "timestamp"])
@@ -498,7 +499,6 @@ def handle_multiple_rounds(directory: str, output: str):
 
         # group by SUT and calculate the mean of each column
         if "Line Coverage" in df.columns:
-            df["Line Coverage"] = df["Line Coverage"].astype(float)
             grouped = df.groupby('SUT').agg(
                 Op_20X_mean=('Op_20X', 'mean'),
                 Op_20X_50X_mean=('Op_20X_50X', 'mean'),

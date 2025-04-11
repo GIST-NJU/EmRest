@@ -29,6 +29,7 @@ Before proceeding, ensure the following dependencies are installed on your Linux
 - Docker and Docker Compose (pull docker images: `mongo:3.6.2`, `mysql:8.3.0`, `witcan/gitlab-ee-api:latest`)
 - Screen (a terminal multiplexer for Linux systems, use `sudo yum install -y screen` to install it on Centos 7)
 - Conda (installation script provided)
+- [mitmproxy](https://mitmproxy.org/#mitmproxy) (a terminal tool for monitoring and intercepting HTTP traffic. We use version `8.1.1-2` in our environment to capture and store network requests that API tools send to the REST APIs.)
 
 You can use the following script provided to install Conda:
 
