@@ -95,12 +95,9 @@ class Config:
         else:
             raise Exception("acts jar is not provided")
 
-        try:
-            auth_token = json.loads(settings.header)
-        except json.JSONDecodeError:
-            raise Exception("expecting strings enclosed in double quotes")
-        else:
-            self.header.update(auth_token)
+        auth_token = settings.header
+        if auth_token != "":
+            self.header.update({"Authorization": f"Bearer {auth_token}"})
 
         try:
             auth_token = json.loads(settings.query)

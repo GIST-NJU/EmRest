@@ -209,7 +209,7 @@ def run_restct(expName, swagger, budget, output, serverUrl, token=None):
         "--patterns": PATTERNS,
         "--jar": ACTS,
         "--budget": budget,
-        "--header": f"Authorization: Bearer {token}"
+        "--header": token
     }
     config_without_token = {
         "--server": serverUrl,
