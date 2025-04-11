@@ -141,8 +141,8 @@ def _run_emrest(expName, swagger, budget, output, serverUrl, suffix='', authKey=
     }
 
     if authKey is not None and token is not None:
-        args["--authKey"] = authKey
-        args["--authValue"] = f"Bearer {token}"
+        args["--auth_key"] = authKey
+        args["--auth_value"] = f"Bearer {token}"
 
     # assemble the command
     cmd = f"cd {emrest_fold} && conda run -n emrest python src/alg{suffix}.py {' '.join([f'{k} {v}' for k, v in args.items()])} > {output}/runtime.log 2>&1"
