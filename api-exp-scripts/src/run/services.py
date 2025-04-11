@@ -515,30 +515,8 @@ def is_ready():
         print("[FAIL] Gradle is not installed or not in PATH")
         success = False
 
-    def has_mitmproxy_in_conda() -> bool:
-        """
-        Checks if 'mitmproxy' is available in the specified Conda environment by
-        parsing the path returned from 'which' and verifying that file exists
-        and is executable.
-        """
-        cmd = f"conda run -n exp which mitmproxy"
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-
-        # Strip any whitespace from the output
-        path = result.stdout.strip()
-        if not path:
-            # If which returns an empty string, the command wasn't found
-            return False
-
-        # Confirm the file exists and is executable
-        if os.path.isfile(path) and os.access(path, os.X_OK):
-            return True
-        else:
-            return False
-
-
     # check mitmproxy
-    if has_mitmproxy_in_conda():
+    if shutil.which('mitmproxy'):
         print("[ OK ] mitmproxy is installed")
     else:
         print("[FAIL] mitmproxy is not installed or not in PATH. mitmproxy is required to capture and analyze HTTP requests during the experiment.")
