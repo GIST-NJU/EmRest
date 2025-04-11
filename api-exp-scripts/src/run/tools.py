@@ -293,9 +293,9 @@ def run_schemathesis(expName, swagger, budget, output, serverUrl, token=None):
     cli_file = os.path.join(TOOL_ROOT, "Schemathesis", "schemathesis_cli.py")
 
     if token is None:
-        run = f"screen -dmS schemathesis_{expName} bash -c \"conda run -n schemathesis python {cli_file} {expName} {swagger} {serverUrl} {budget} > {output}/runtime.log 2>&1\""
+        run = f"screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} > {output}/runtime.log 2>&1\""
     else:
-        run = f"screen -dmS schemathesis_{expName} bash -c \"conda run -n schemathesis python {cli_file} {expName} {swagger} {serverUrl} {budget} {token} > {output}/runtime.log 2>&1\""
+        run = f"screen -dmS schemathesis_{expName} bash -c \"python {cli_file} {expName} {swagger} {serverUrl} {budget} {token} > {output}/runtime.log 2>&1\""
 
     # print(run)
     subprocess.run(run, shell=True)

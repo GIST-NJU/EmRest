@@ -10,7 +10,7 @@ def cli():
     run = f"schemathesis run {spec_file} --base-url {base_url} --stateful=links --request-timeout 5000 --validate-schema False"
 
     if token is not None:
-        run += f"-H \"Authorization: Bearer {token}\""
+        run += f" -H \"Authorization: Bearer {token}\""
 
     while time.time() - start_time < int(time_budget):
         subprocess.run(run, shell=True)
