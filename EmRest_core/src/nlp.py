@@ -47,15 +47,18 @@ def tokenize(text: str) -> list[str]:
 def clean_string(input_string):
     input_string = input_string.strip()
 
+    if len(input_string) == 0:
+        return input_string
+
     while input_string[0] not in "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_":
         input_string = input_string[1:]
         if input_string == "":
-            break
+            return ""
 
     while input_string[-1] not in "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_":
         input_string = input_string[:-1]
         if input_string == "":
-            break
+            return ""
 
     return input_string
 
