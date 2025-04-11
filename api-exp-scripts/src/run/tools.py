@@ -324,7 +324,7 @@ def is_ready():
         return False  
 
     # List of required conda environments and their essential packages
-    conda_envs = {"RestCT": "restct", "ARAT-RL": "rl", "Morest": "morest", "Schemathesis": "schemathesis"}
+    conda_envs = {"RestCT": "restct", "ARAT-RL": "rl", "Morest": "morest", "MINER": "miner", "Schemathesis": "schemathesis", "EmRest": "emrest"}
 
     # Get existing conda environments
     try:
@@ -333,7 +333,7 @@ def is_ready():
         print(f"[FAIL] Error executing conda command: {e}")
         return False
 
-    print("Checking conda environments for tools: RestCT, ARAT-RL, Morest, Schemathesis")
+    print("Checking conda environments for tools: RestCT, ARAT-RL, Morest, Schemathesis, EmRest, Miner and exp scripts")
     for tool, env_name in conda_envs.items():
         if env_name in env_list_output:
             print(f"    [ OK ] Conda environment for '{tool}' exists: '{env_name}'")
@@ -341,6 +341,12 @@ def is_ready():
         else:
             print(f"    [FAIL] Conda environment for '{tool}' does not exist: '{env_name}'")
             success = False
+
+    if "exp" in env_list_output:
+        print("    [ OK ] Conda environment for experiment scripts exists: 'exp'")
+    else:
+        print("    [FAIL] Conda environment for experiment scripts does not exist: 'exp'")
+        success = False
 
     print("Checking Java 1.8 for tool: EvoMaster")
     cmd = f'bash -c ". {JDK_8} && java -version"'
