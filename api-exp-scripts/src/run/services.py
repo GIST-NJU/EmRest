@@ -373,7 +373,7 @@ services:
         mitmproxy_output = os.path.join(output_dir, f"mitmproxy_{sut.exp_name}_{port}_proxy.txt")
         _generate_mitmproxy_script(mitmproxy_script, mitmproxy_output)
 
-       subprocess.run(
+        subprocess.run(
             f"screen -dmS {sut.exp_name}_{port}_proxy mitmproxy --mode reverse:http://localhost:{port} -p {mitmproxy_port} -s {mitmproxy_script}",
             shell=True)
         return port, mitmproxy_port
