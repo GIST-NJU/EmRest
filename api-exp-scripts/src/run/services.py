@@ -311,7 +311,7 @@ def run_emb_service(sut: Service, port: int, output_dir: str, use_mimproxy: bool
 
     if use_mimproxy:
         # run mitmproxy
-        subprocess.run(
+        subprocess.Popen(
             f"screen -dmS {sut.exp_name}_{port}_proxy conda activate exp && mitmdump --mode reverse:http://localhost:{port} -p {mimproxy_port} -s {m_script_file}",
             shell=True,
         )
@@ -373,7 +373,7 @@ services:
         mitmproxy_output = os.path.join(output_dir, f"mitmproxy_{sut.exp_name}_{port}_proxy.txt")
         _generate_mitmproxy_script(mitmproxy_script, mitmproxy_output)
 
-        subprocess.run(
+        subprocess.Popen(
             f"screen -dmS {sut.exp_name}_{port}_proxy conda activate exp && mitmdump --mode reverse:http://localhost:{port} -p {mitmproxy_port} -s {mitmproxy_script}",
             shell=True)
         return port, mitmproxy_port
