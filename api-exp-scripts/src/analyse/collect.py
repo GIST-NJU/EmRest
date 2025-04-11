@@ -380,7 +380,7 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
             })
             reformat_merged_df = pd.merge(reformat_merged_df, line_coverage_df, on='SUT', how='outer')
             reformat_merged_df['Covered Lines'] = reformat_merged_df['Covered Lines'].astype(int)
-            reformat_merged_df['Line Coverage'] = reformat_merged_df['Line Coverage'].astype(float).map(lambda x: '{:.2f}'.format(x))
+            reformat_merged_df['Line Coverage'] = reformat_merged_df['Line Coverage'].astype(float)
 
         # Save final CSV files
         result_csv = os.path.join(result_dir, "coverage_and_bug.csv")
@@ -388,7 +388,7 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
 
         df_csv = os.path.join(result_dir, "request_info.csv")
         r_info.to_csv(df_csv, index=True)
-        return merged_df
+        return reformat_merged_df
 
 
     r_info = pd.DataFrame(columns=["sut", "op", "op_total", "status", "timestamp"])
