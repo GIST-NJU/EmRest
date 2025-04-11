@@ -47,7 +47,7 @@ chmod +x install_conda.sh
     ```
 
 3) Navigate to the `api-exp-scripts` directory (this directory).
-4) Open a terminal in this directory and verify that all dependencies have been installed and are accessible, especially the `conda activate` command and the `poetry` command.
+4) Open a terminal in this directory and verify that all dependencies have been installed and are accessible, especially the `conda activate` command.
 5) Run the commands:
     ```bash
     chmod +x setup_all_experiment.sh
@@ -104,9 +104,9 @@ conda run -n exp python src/run/tools.py check
 conda run -n exp python src/run/tools.py run \
   --tool arat-rl \
   --expName MyAPI \
-  --swaggerV2 ../api-suts/MyAPI/openapi_v2.yaml \
+  --swaggerV2 ../api-suts/specifications/v2/openapi_v2.yaml \
   --budget 3600 \
-  --output logs/tools_run \
+  --output logs/myapi \
   --serverUrl http://localhost:8080/api
 ```
 
@@ -122,7 +122,7 @@ Among the 16 REST APIs under test, we categorize them into two groups: **10 `emb
 
 #### Important Note on Hardware Requirements
 
-- **Memory**: Our original experiments were performed on a machine with **120 GB of RAM** and **X CPU**, which was just sufficient for running all 6 `gitlab_services` in parallel. If your machine has less available memory, you should consider reducing the number of REST APIs that are tested in parallel.
+- **Memory**: Our original experiments were performed on a machine with **120 GB of RAM** and **48 CPUs**, which was just sufficient for running all 6 `gitlab_services` in parallel. If your machine has less available memory, you should consider reducing the number of REST APIs that are tested in parallel.
 
 - **Disk Space**: Recording all requests, logs, coverage data, and bug detection information consumes substantial storage space. In our experiments, the total size of generated raw data of 30 runs reached approximately **1.6 TB**. Ensure your system has at least **1.6 TB** of free disk space available to fully replicate the experimental results.
 
