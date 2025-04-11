@@ -47,8 +47,8 @@ def cli():
 @click.option('--serverUrl', required=True, help='the URL of the REST API Server, e.g., http://localhost:8080/api')
 @click.option('--authKey', '-ak', help='the key of the authorization header')
 @click.option('--token', help='the token of gitlab')
-def run_cli(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey, token):
-    run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey, token)
+def run_cli(tool, expname, swaggerV2, swaggerV3, budget, output, serverUrl, authKey, token):
+    run_tool(tool, expname, swaggerV2, swaggerV3, budget, output, serverUrl, authKey, token)
 
 
 def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, authKey=None, token=None):

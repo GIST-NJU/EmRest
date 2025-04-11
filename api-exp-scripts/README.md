@@ -109,7 +109,7 @@ Checking API jars...
 conda run -n exp python src/run/services.py run \
   --sut myDemo \
   --port 8080 \
-  --output-dir logs
+  --output-dir /absolute/path/to/output
 ```
 
 ### Run Testing Tool (`tools.py`)
@@ -143,7 +143,7 @@ Checking Java 1.8 for tool: EvoMaster
 conda run -n exp python src/run/tools.py run \
   --tool arat-rl \
   --expName MyAPI \
-  --swaggerV2 ../api-suts/specifications/v2/openapi_v2.yaml \
+  --swaggerV2 /absolute/path/tp/api-suts/specifications/v2/openapi_v2.yaml \
   --budget 3600 \
   --output logs/myapi \
   --serverUrl http://localhost:8080/api
