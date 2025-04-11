@@ -146,7 +146,7 @@ def _run_emrest(expName, swagger, budget, output, serverUrl, suffix='', authKey=
         args["--authValue"] = f"Bearer {token}"
 
     # assemble the command
-    cmd = f"cd {emrest_fold} && poetry run python src/alg{suffix}.py {' '.join([f'{k} {v}' for k, v in args.items()])} > {output}/runtime.log 2>&1"
+    cmd = f"cd {emrest_fold} && conda run -n emrest python src/alg{suffix}.py {' '.join([f'{k} {v}' for k, v in args.items()])} > {output}/runtime.log 2>&1"
     screened = f"screen -dmS emrest{suffix}_{expName} bash -c \"{cmd}\""
     # run the command
     subprocess.run(screened, shell=True)
