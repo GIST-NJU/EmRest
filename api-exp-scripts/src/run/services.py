@@ -303,11 +303,24 @@ def run_emb_service(sut: Service, port: int, output_dir: str, use_mimproxy: bool
         f.write("\n")
         f.write(f"{api_command}")
 
-    # run service
-    subprocess.run(
-        f"chmod +x {sh_file} && screen -dmS {sut.exp_name}_{port}_service bash -c 'sh {sh_file} > {os.path.join(output_dir, sh_file.replace('.sh', '.log'))} 2>&1'",
-        shell=True,
-    )
+    try:
+        # 'check=True' means if the command returns a non-zero exit code,
+        # it will raise a CalledProcessError
+        # run service
+        log_file = os.path.join(output_dir, sh_file.replace('.sh', '.log'))
+        subprocess.run(
+            f"chmod +x {sh_file} && screen -dmS {sut.exp_name}_{port}_service bash -c 'sh {sh_file} > {log_file} 2>&1'",
+            shell=True,
+        )        
+        print(f"[OK] Service '{sut_name}' started on port {port}, logs at {log_file}")
+    except subprocess.CalledProcessError as e:
+        # If the command fails, you can show a custom error message
+        # or even display e.stdout / e.stderr if you used capture_output.
+        print(f"[FAIL] Failed to start service '{sut_name}' on port {port}")
+        print(f"Command: {cmd}")
+        print(f"Return code: {e.returncode}")
+        # Because we used shell=True and not capture_output=True, e.stdout/e.stderr might be empty,
+        # logs will be in log_file, but at least we know it failed.
 
     if use_mimproxy:
         # run mitmproxy
