@@ -48,6 +48,8 @@ def cli():
 @click.option('--authKey', '-ak', help='the key of the authorization header')
 @click.option('--token', help='the token of gitlab')
 def run_cli(tool, expname, swaggerv2, swaggerv3, budget, output, serverurl, authkey, token):
+    print(f"Running {tool} on {expname} with budget {budget} seconds")
+    p
     run_tool(tool, expname, swaggerv2, swaggerv3, budget, output, serverurl, authkey, token)
 
 
@@ -75,8 +77,7 @@ def run_tool(tool, expName, swaggerV2, swaggerV3, budget, output, serverUrl, aut
             if swaggerV3:
                 return swaggerV3
             else:
-                raise Exception("Not Implemented for other tools")
-
+                raise Exception("swaggerV3 is not specified, but swaggerV3 is required for this tool")
     tool = tool.lower()
     validate()
     swagger = choose_swagger_version()
