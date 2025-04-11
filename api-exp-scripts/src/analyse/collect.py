@@ -21,6 +21,7 @@ from src.run.tools import TOOLS
 1. parse a round of data -> Operation Coverage (csv), Bug Detection (csv), and a folder of bug.json for each sut
 """
 
+
 def get_unique_bug(_sut: str, response: str):
     if "market" in _sut:
         response = re.sub(r'For input string:(.*?),"description"', 'For input string: *,"description"', response)
@@ -274,6 +275,7 @@ def parse_proxy_file(sut: str, proxy_file: str, path_patterns: dict[str, list[st
     proxy_df["op_total"] = sum([len(_s) for _s in operations.values()])
     return proxy_df, bug_total, bug_unique
 
+
 def get_emb_coverage(sut_path: str, exec_file: str, jdk: str) -> tuple[int, float]:
     def get_source_files_for_jacoco():
         source_files = []
@@ -310,12 +312,30 @@ def get_emb_coverage(sut_path: str, exec_file: str, jdk: str) -> tuple[int, floa
     subprocess.run(f". {os.path.join(API_SUTS_FOLD, jdk)} && {command}", shell=True)
 
     # read the csv file
-    # TODO: return covered line and line coverage [int, float]
-    return 0, 0.0
+    df = pd.read_csv(to_csv)
 
-def get_gitlab_coverage(sut_path: str, exec_file: str) -> tuple[int, float]:
-    # TODO: implement
-    return 0, 0.0
+    cols_to_convert = ['LINE_COVERED', 'LINE_MISSED', 'BRANCH_COVERED', 'BRANCH_MISSED', 'METHOD_COVERED',
+                       'METHOD_MISSED']
+    df[cols_to_convert] = df[cols_to_convert].astype(int)
+
+    result = df[cols_to_convert].agg('sum')
+
+    result['total_line_coverage'] = (
+                result['LINE_COVERED'] / (result['LINE_COVERED'] + result['LINE_MISSED']) * 100).round(
+        2)
+    result['total_branch_coverage'] = (
+            result['BRANCH_COVERED'] / (result['BRANCH_COVERED'] + result['BRANCH_MISSED']) * 100).round(2)
+    result['total_method_coverage'] = (
+            result['METHOD_COVERED'] / (result['METHOD_COVERED'] + result['METHOD_MISSED']) * 100).round(2)
+
+    return result['LINE_COVERED'], result['total_line_coverage']
+
+
+def get_gitlab_coverage(coverage_file) -> tuple[int, float]:
+    with open(coverage_file, 'r') as file:
+        data = json.load(file)
+    return data["covered_line"], data["covered"]
+
 
 def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
     """
@@ -420,14 +440,15 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
             line_coverages['sut'].append(sut.exp_name)
             line_coverages['covered_lines'].append(covered)
             line_coverages['line_coverage'].append(coverage)
-        coverge_file = find_file("_coverage.json")
-        if coverge_file is not None:
+        coverage_file = find_file("_coverage.json", sut_fold)
+        if coverage_file is not None:
             covered, coverage = get_gitlab_coverage(coverage_file)
             line_coverages['sut'].append(sut.exp_name)
             line_coverages['covered_lines'].append(covered)
             line_coverages['line_coverage'].append(coverage)
 
     return process_request_info()
+
 
 def handle_single_round(directory: str, result_dir: str) -> pd.DataFrame:
     """
@@ -436,6 +457,7 @@ def handle_single_round(directory: str, result_dir: str) -> pd.DataFrame:
     :return:
     """
     return get_operation_coverage_and_bug_detection(directory, result_dir)
+
 
 def handle_multiple_rounds(directory: str, output: str):
     """
@@ -501,6 +523,7 @@ def handle_multiple_rounds(directory: str, output: str):
         print(grouped.to_string(index=True))
         result_csv = os.path.join(result_dir, "result.html")
         grouped.to_html(result_csv, escape=False, render_links=True)
+
 
 @click.command()
 @click.option('-i', '--directory', type=str, help='input directory')
