@@ -15,9 +15,13 @@ API_SUTS_FOLD = current_file.parents[3] / 'api-suts'
 if not os.path.exists(API_SUTS_FOLD):
     raise ValueError("API_SUTS_FOLD does not exist")
 
-JACOCO = API_SUTS_FOLD / "jacoco/jacocoagent.jar"
+JACOCO = os.path.join(API_SUTS_FOLD, "jacoco", "jacocoagent.jar")
 if not os.path.exists(JACOCO):
     raise ValueError("JACOCO does not exist")
+
+JACOCO_CLI = os.path.join(API_SUTS_FOLD, "jacoco", "jacococli.jar")
+if not os.path.exists(JACOCO):
+    raise ValueError("JACOCO CLI does not exist")
 
 
 @dataclass(frozen=True)
