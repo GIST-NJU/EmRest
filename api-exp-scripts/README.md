@@ -1,6 +1,6 @@
 # EmRest Experimental Scripts and Replication Instructions
 
-> **Important**: The experiments can only be replicated on a Linux operating system. We specifically recommend CentOS 7, which we used in our study. Our experimental setup involves running 11 testing tools, 16 APIs, and 30 repeated runs per tool–API pair, resulting in a large number of concurrent processes. We rely on the Linux `screen` command to manage and monitor these processes effectively.
+> **Important**: The experiments can only be replicated on a Linux operating system. We specifically recommend CentOS 7, which we used in our study. Our experimental setup involves running 11 testing tools on 16 APIs with 30 repetitions, resulting in a large number of concurrent processes. We rely on the Linux `screen` command to manage and monitor these processes effectively.
 
 This directory (`api-exp-scripts`) contains all scripts and detailed instructions necessary to replicate the experiments described in our ISSTA 2025 paper, including orchestration of experiments and data analysis.
 
@@ -8,21 +8,14 @@ This directory (`api-exp-scripts`) contains all scripts and detailed instruction
 
 ## Current Directory Contents
 
-### Running Experiments
-- **`src/run/tools.py`**: Provides Python functions to execute EmRest and baseline tools using given API specifications.
-- **`src/run/services.py`**: Provides scripts to run all evaluated REST APIs.
-- **`src/run/replicate.py`**: Automates the replication of all experiments described in our paper.
+### Scripts for Running Experiments
+- **`src/run/tools.py`**: Provides functions to execute EmRest and baseline tools using given API specifications.
+- **`src/run/services.py`**: Provides functions to deploy and manage all REST APIs under test (SUTs).
+- **`src/run/replicate.py`**: Automates the replication of all experiments described in our paper, by calling functions defined in `services.py` and `tools.py`.
 
-### Data Collection and Analysis
+### Scripts for Data Collection and Analysis
 - **`src/analyse/collect.py`**: Aggregates experimental data, including test logs, operation coverage, and bug detection statistics.
-- **`src/analyse/analysis.ipynb`**: Processes the collected data and generates result tables and figures in the paper.
-
-
-## Related Directories (Sibling directories)
-
-- **`../api-suts`**: Scripts and configurations to build and run the REST APIs under test.
-- **`../api-tools`**: Contains baseline testing tools (`ARAT-RL`, `MINER`, `Morest`, `RestCT`, `Schemathesis`, `EvoMaster`).
-- **`../EmRest_core`**: The source code of the `EmRest` tool and its dependencies.
+- **`src/analyse/analysis.ipynb`**: Processes the collected data and generates tables and figures in the paper.
 
 ---
 
@@ -34,37 +27,35 @@ Before proceeding, ensure the following dependencies are installed on your Linux
 - Maven (we used version 3.8.8 in our experiments) 
 - Gradle (we used version 8.5 in our experiments)
 - Docker and Docker Compose (pull docker images: `mongo:3.6.2`, `mysql:8.3.0`, `witcan/gitlab-ee-api:latest`)
-- Conda (installation script provided)
 - Screen (a terminal multiplexer for Linux systems, use `sudo yum install -y screen` to install it on Centos 7)
+- Conda (installation script provided)
 
-### Provided Installation Scripts
+You can use the following script provided to install Conda:
 
-We provide installation scripts for Conda:
+```bash
+chmod +x install_conda.sh
+./install_conda.sh
+```
 
-- **Install Conda**:
+## Environment Setup
+1) Navigate to the `../api-suts` directory and configure your Java paths:
 
-    ```bash
-    chmod +x install_conda.sh
-    ./install_conda.sh
-    ```
-
-## Step-by-Step Environment Setup
-- Navigate to the `../api-suts` directory and configure your Java paths:
-- Edit files `java8.env`, `java11.env`, and `java17.env` to correctly export `JAVA_HOME` paths. Example for `java8.env`:
+   Edit files `java8.env`, `java11.env`, and `java17.env` to correctly export `JAVA_HOME` paths. Example for `java8.env`:
     ```bash
     export JAVA_HOME=/path/to/jdk1.8.0_361
     export PATH=$JAVA_HOME/bin:$PATH
     ```
-- Navigate to the `api-exp-scripts` directory (this directory).
-- Open a terminal in this directory and verify that all dependencies have been installed and are accessible, especially the `conda activate` command and the `poetry` command.
-- Run the commands:
+
+3) Navigate to the `api-exp-scripts` directory (this directory).
+4) Open a terminal in this directory and verify that all dependencies have been installed and are accessible, especially the `conda activate` command and the `poetry` command.
+5) Run the commands:
     ```bash
     chmod +x setup_all_experiment.sh
     ./setup_all_experiment.sh
     ```
     This script will:
 
-    - Build the REST APIs (by calling `setup.sh` in `../api-suts`).
+    - Build the REST APIs under test (by calling `setup.sh` in `../api-suts`).
 
     - Set up baseline testing tools (by calling `setup.sh` in `../api-tools`).
 
@@ -72,18 +63,36 @@ We provide installation scripts for Conda:
 
     - Set up the experiment scripts (this directory) so you can run them immediately.
 
-## Verify and Run Experiment Scripts
-Current ditectory (`api-exp-scripts`) uses three Python scripts in the `src/run` directory for orchestrating experiments:
-- **`services.py`**: Manages REST APIs (SUTs).  
-- **`tools.py`**: Manages testing tools (baselines and EmRest).
-- **`replicate.py`**: Automates the **full experimental process** used in our paper, by calling functions defined in `services.py` and `tools.py`
+## Perform Testing
 
-### `tools.py`
+To use one tseting tool to test a specified REST API, use `services.py` to first run the REST API under test, and then use `tools.py` to invoke the execution of the testing tool.
 
-Rely on [Click](https://palletsprojects.com/p/click/) for CLI commands, each exposing subcommands named `run` and `check`
-- `check`: Verifies whether your system is ready to execute the testing tools (e.g., checks for Conda environments, required Python versions, etc.).
+### Run REST APIs Under Test (`services.py`)
 
-- `run`: Invokes one of the supported baseline tools or EmRest to test a specified API, requiring parameters such as the OpenAPI spec file path, test budget, and output directory.
+Use the following two commands to verify the system environment, and run a specified REST API.
+
+- **`check`**: Verifies whether your system environment is ready to run the REST APIs (SUTs).  
+- **`run`**: Starts a chosen REST API on a specified port, optionally enabling/disabling JaCoCo coverage and mitmproxy interception.
+
+#### Example Usage
+
+```bash
+# 1) Check environment readiness for running REST APIs
+conda run -n exp python src/run/services.py check
+
+# 2) Run a REST API named 'myDemo' on port 8080, storing logs in 'logs/'
+conda run -n exp python src/run/services.py run \
+  --sut myDemo \
+  --port 8080 \
+  --output-dir logs
+```
+
+### Run Testing Tool (`tools.py`)
+
+Similarly, use the following two commands to verify the system environment, and run a specified testing tool.
+
+- `check`: Verifies whether your system environment is ready to run the testing tools (e.g., checks for Conda environments, required Python versions, etc.).
+- `run`: Invokes one of the baseline tools or EmRest to test a specified API, requiring parameters such as the OpenAPI spec file path, test budget, and output directory.
 
 #### Example Usage
 
@@ -91,7 +100,7 @@ Rely on [Click](https://palletsprojects.com/p/click/) for CLI commands, each exp
 # 1) Check environment readiness for running testing tools
 conda run -n exp python src/run/tools.py check
 
-# 2) Run a specified tool (e.g., 'arat-rl') on an API, with one-hour budget
+# 2) Use a tool named 'arat-rl' to test an API (on port 8080), with one-hour budget
 conda run -n exp python src/run/tools.py run \
   --tool arat-rl \
   --expName MyAPI \
@@ -100,42 +109,26 @@ conda run -n exp python src/run/tools.py run \
   --output logs/tools_run \
   --serverUrl http://localhost:8080/api
 ```
-### `services.py`
-Also rely on [Click](https://palletsprojects.com/p/click/) for CLI commands, each exposing subcommands named `run` and `check`
-- **`check`**: Verifies your environment meets the requirements for starting any of the APIs (SUTs).  
-- **`run`**: Starts a chosen service on a specified port, optionally enabling/disabling JaCoCo coverage and mitmproxy interception.
 
-#### Example Usage
+## Replicate All Experiments
 
-```bash
-# 1) Check if your environment can properly launch the SUT
-conda run -n exp python src/run/services.py check
-
-# 2) Run an SUT named 'myDemo' on port 8080, storing logs in 'logs/'
-conda run -n exp python src/run/services.py run \
-  --sut myDemo \
-  --port 8080 \
-  --output-dir logs
-```
-
-### `replicate.py`
-Automates the **full experimental process** used in our paper. Among the 16 evaluated APIs, we categorize them into two groups: **10 `emb_services`** and **6 `gitlab_services`**. For each testing tool, the experiment involves repeating 30 rounds, each structured as follows: first, all 10 `emb_services` run concurrently for **one hour**; after completion and cleanup, all 6 `gitlab_services` then run concurrently for another **one-hour period**. 
-
-#### Example Usage
+Use `replicate.py` to automatically execute the **full experimental process** reported in our paper:
 
 ```bash
 conda run -n exp python src/run/replicate.py 
 ```
 
-> **Important Note on Hardware Requirements:**
-> - **Memory**: Our original experiments utilized a machine with **120 GB of RAM**, which was just sufficient for concurrently running all 6 `gitlab_services`. If your machine has less available memory, you should consider reducing the number of simultaneous services.
-> - **Disk Space**: Recording all requests, logs, coverage data, and bug detection information consumes substantial storage space. In our experiments, the total size of generated raw data of 30 runs reached approximately **1.6 TB**. Ensure your system has at least **1.6 TB** of free disk space available to fully replicate the experimental results.
+Among the 16 REST APIs under test, we categorize them into two groups: **10 `emb_services`** and **6 `gitlab_services`**. For each testing tool, the experiment involves repeating 30 rounds, each structured as follows: first, perform the testing on all 10 `emb_services` in parallel for **one hour**; after completion and cleanup, the testing of all 6 `gitlab_services` then run in parallel for another **one-hour period**.
 
+#### Important Note on Hardware Requirements
 
+- **Memory**: Our original experiments were performed on a machine with **120 GB of RAM** and **X CPU**, which was just sufficient for running all 6 `gitlab_services` in parallel. If your machine has less available memory, you should consider reducing the number of REST APIs that are tested in parallel.
 
-#### Reduce the Number of Simultaneous Services
+- **Disk Space**: Recording all requests, logs, coverage data, and bug detection information consumes substantial storage space. In our experiments, the total size of generated raw data of 30 runs reached approximately **1.6 TB**. Ensure your system has at least **1.6 TB** of free disk space available to fully replicate the experimental results.
 
-If your machine does not have enough memory to run all services in parallel (especially the 6 GitLab-based services), you can reduce the number of services launched at the same time by modifying the experiment script.
+#### Reduce the Number of REST APIs Run in Parallel
+
+If your machine does not have enough memory to run all REST APIs in parallel (especially the 6 GitLab-based services), you can reduce the number of REST APIs launched at the same time by modifying the experiment script.
 
 For example, in `replicate.py`, the function `rq1_and_rq2()` replicates experiments for RQ1 and RQ2. The original logic is:
 
@@ -158,7 +151,8 @@ def rq1_and_rq2():
         ...
     )
 ```
-To reduce the number of simultaneous services, you can split the list of services into smaller batches. For instance:
+
+To reduce the number of REST APIs run in parallel, you can split the list of services into smaller batches. For instance:
 
 ```python
 def rq1_and_rq2(result_dir):
@@ -192,7 +186,7 @@ def rq1_and_rq2(result_dir):
     )
 ```
 
-## Collect and Analyze Experiment Results
+## Collect and Analyze Experimental Results
 After running the experiments, the raw result data will be saved in the `result_dir` specified as the input argument to the `rq1_and_rq2` and `rq3` functions in `replicate.py`.
 
 The structure of result_dir is as follows:
@@ -216,18 +210,17 @@ result_dir/
 Each subdirectory under `result_dir` corresponds to a testing approach and contains multiple `roundX/` folders, where each folder stores the logs, monitored HTTP requests and responses, code coverage, and other raw execution results of one experimental run.
 
 ### Aggregate Results for Analysis
-You can use the script `src/analyse/collect.py` to aggregate the raw experimental results into structured `csv` data for further analysis (e.g., operation coverage and bug detection metrics). This script also uses the Click library to support CLI commands.
+Use the script `src/analyse/collect.py` to aggregate the raw experimental results into structured `csv` data for further analysis (e.g., operation coverage and bug detection metrics).
 
 ```bash
 conda run -n exp python -m src.analyse.collect -i result_dir -o data_dir 
 ```
 
 **Parameters**:
-- `result_dir`: The root directory containing raw experimental outputs (as shown above).
+- `-i`: The root directory containing raw experimental outputs.
+- `-o`: The target directory where the aggregated analysis results (e.g., .csv, .json) will be stored for plotting and table generation in the paper.
 
-- `data_dir`: The target directory where the aggregated analysis results (e.g., .csv, .json) will be stored for plotting and table generation in the paper.
-
-After running the `collect.py` script, the aggregated analysis results will be saved in the specified data_dir. The structure of data_dir mirrors that of result_dir, but it contains parsed and structured data instead of raw logs.
+After running the `collect.py` script, the aggregated analysis results will be saved in the specified `data_dir` directory. The structure of `data_dir` is similar to that of `result_dir`, but it contains parsed and structured data instead of raw logs.
 
 ```txt
 data_dir/
@@ -272,4 +265,3 @@ In the first cell, set the following variables:
 
 After configuration, you can run the notebook cell by cell to regenerate all figures and tables reported in the paper.
 The notebook includes the original outputs from our experiments for reference. You can clear and re-run to verify results or modify for further analysis.
-
