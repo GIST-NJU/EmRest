@@ -417,9 +417,12 @@ def run_cli(sut, port, output_dir, disable_mitmproxy, disable_jacoco):
         port = run_gitlab_service(service, port, output_dir, use_mitmproxy)
     else:
         port = run_emb_service(service, port, output_dir, use_mitmproxy, use_jacoco)
-    click.echo(f"Starting service '{service.exp_name}' on port {port}.")
+    click.echo(f"Starting service '{service.exp_name}' on port {port[0]}.")
     click.echo(f"Output will be stored in '{output_dir}'.")
-    click.echo(f"mitmproxy is {'enabled' if use_mitmproxy else 'disabled'}.")
+    if use_mitmproxy:
+        click.echo(f"Mitmproxy is enabled. Proxy traffic on port {port[1]}.")
+    else:
+        click.echo(f"Mitmproxy is disabled.")
     click.echo(f"JaCoCo coverage is {'enabled' if use_jacoco else 'disabled'}.")
 
 
