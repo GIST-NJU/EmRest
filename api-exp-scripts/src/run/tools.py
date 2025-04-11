@@ -264,10 +264,12 @@ Authorization: Bearer token
     compile = f"chmod 777 {miner_home} && conda run -n miner {miner_home} compile --api_spec {swagger}"
     run_miner = f"{miner_home} fuzz --grammar_file ./Compile/grammar.py --dictionary_file ./Compile/dict.json --settings ./Compile/engine_settings.json --no_ssl --time_budget {budget / 3600} --disable_checkers payloadbody"
     run = f"chmod 777 {miner_home} && cd {destination} && screen -dmS miner_{expName} bash -c \"conda run -n miner {run_miner}\""
-    if token is not None:
-        write_token(destination, token)
+
     subprocess.run(f"rm -rf {destination}", shell=True)
     subprocess.run(mkdir + f" && cd {destination} && {compile}", shell=True)
+
+    if token is not None:
+        write_token(destination, token)
 
     subprocess.run(f"cd {destination} && {run}", shell=True)
 
