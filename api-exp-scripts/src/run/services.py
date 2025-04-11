@@ -312,11 +312,11 @@ def run_emb_service(sut: Service, port: int, output_dir: str, use_mimproxy: bool
             f"chmod +x {sh_file} && screen -dmS {sut.exp_name}_{port}_service bash -c 'sh {sh_file} > {log_file} 2>&1'",
             shell=True,
         )        
-        print(f"[OK] Service '{sut_name}' started on port {port}, logs at {log_file}")
+        print(f"[OK] Service '{sut.exp_name}' started on port {port}, logs at {log_file}")
     except subprocess.CalledProcessError as e:
         # If the command fails, you can show a custom error message
         # or even display e.stdout / e.stderr if you used capture_output.
-        print(f"[FAIL] Failed to start service '{sut_name}' on port {port}")
+        print(f"[FAIL] Failed to start service '{sut.exp_name}' on port {port}")
         print(f"Command: {cmd}")
         print(f"Return code: {e.returncode}")
         # Because we used shell=True and not capture_output=True, e.stdout/e.stderr might be empty,
