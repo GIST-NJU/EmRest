@@ -213,8 +213,6 @@ def run_tools_on_gitlab_services(
             # GitLab requires extra time to initialize
             time.sleep(600)
 
-            gitlab_cov_scripts = os.path.join(API_SUTS_FOLD, "gitlab_cov.py")
-
             # Retrieve GitLab tokens for each service
             tokens = {}
             for s in suts:
@@ -222,13 +220,6 @@ def run_tools_on_gitlab_services(
                 tokens[s[0].exp_name] = token
                 # Reset coverage before the test
                 requests.post(f"http://localhost:{s[1]}/api/v4/templates/reset_coverage")
-
-                # Start a separate screen session to track runtime coverage
-                # The script 'gitlab_cov.py' presumably collects coverage data in real time
-                subprocess.run(
-                    f"screen -dmS gitlab_{s[0].exp_name}_runtime_cov bash -c 'python {gitlab_cov_scripts} {os.path.join(temp_dir, s[0].exp_name)} {s[0].exp_name} {s[1]}'",
-                    shell=True
-                )
 
             # Run the tool on each SUT
             for s in suts:
