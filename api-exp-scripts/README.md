@@ -80,6 +80,31 @@ Use the following two commands to verify the system environment, and run a speci
 # 1) Check environment readiness for running REST APIs
 conda run -n exp python src/run/services.py check
 
+# Expected output:
+[ OK ] Linux operating system detected
+[ OK ] 'screen' command is available
+[ OK ] Java 1.8 correctly set by /home/ubuntu/EmRest/api-suts/java8.env
+[ OK ] Java 11 correctly set by /home/ubuntu/EmRest/api-suts/java11.env
+[ OK ] Java 17 correctly set by /home/ubuntu/EmRest/api-suts/java17.env
+[ OK ] JaCoCo agent '/home/ubuntu/EmRest/api-suts/jacoco/jacocoagent.jar' found
+[ OK ] JaCoCo CLI '/home/ubuntu/EmRest/api-suts/jacoco/jacococli.jar' found
+[ OK ] Docker is installed
+[ OK ] Maven is installed
+[ OK ] Gradle is installed
+[ OK ] mitmproxy is installed
+Checking API jars...
+    [ OK ] features-service: API jar '/home/ubuntu/EmRest/api-suts/services/emb/jdk_8_maven/em/embedded/rest/features-service/target/features-service-run.jar' found
+    [ OK ] languagetool: API jar '/home/ubuntu/EmRest/api-suts/services/emb/jdk_8_maven/em/embedded/rest/languagetool/target/languagetool-run.jar' found
+    [ OK ] restcountries: API jar '/home/ubuntu/EmRest/api-suts/services/emb/jdk_8_maven/em/embedded/rest/restcountries/target/restcountries-run.jar' found
+    [ OK ] ncs: API jar '/home/ubuntu/EmRest/api-suts/services/emb/jdk_8_maven/em/embedded/rest/ncs/target/rest-ncs-run.jar' found
+    [ OK ] scs: API jar '/home/ubuntu/EmRest/api-suts/services/emb/jdk_8_maven/em/embedded/rest/scs/target/rest-scs-run.jar' found
+    [ OK ] genome-nexus: API jar '/home/ubuntu/EmRest/api-suts/services/emb/jdk_8_maven/em/embedded/rest/genome-nexus/target/genome-nexus-run.jar' found
+    [ OK ] market: API jar '/home/ubuntu/EmRest/api-suts/services/emb/jdk_11_maven/em/embedded/rest/market/target/market-run.jar' found
+    [ OK ] person-controller: API jar '/home/ubuntu/EmRest/api-suts/services/rl/person-controller/target/java-spring-boot-mongodb-starter-1.0.0.jar' found
+    [ OK ] user-management: API jar '/home/ubuntu/EmRest/api-suts/services/rl/user-management/target/microdemo2-1.0.0-SNAPSHOT.jar' found
+    [ OK ] emb-project: API jar '/home/ubuntu/EmRest/api-suts/services/rl/project-tracking-system/target/project-tracking-system.jar' found
+[ OK ] All prerequisites are met 
+
 # 2) Run a REST API named 'myDemo' on port 8080, storing logs in 'logs/'
 conda run -n exp python src/run/services.py run \
   --sut myDemo \
