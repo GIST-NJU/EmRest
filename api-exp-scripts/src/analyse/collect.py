@@ -6,6 +6,13 @@ import click
 import pandas as pd
 import yaml
 from tqdm import trange
+import subprocess
+import sys
+from pathlib import Path
+
+project_root = Path(__file__).parents[2]
+
+sys.path.append(str(project_root))
 
 from src.run.services import API_SUTS_FOLD, JACOCO_CLI, gitlab_services, emb_services
 from src.run.tools import TOOLS
@@ -60,7 +67,7 @@ def get_unique_bug(_sut: str, response: str):
             part_b = response[response.find("<b>root cause</b>"):(response.find("</pre><p><b>note") + len("</pre>"))]
             part_b = part_b[:part_b.find("\n")]
             response = part_b
-        else:           
+        else:
             print(f"[Warning] Error response match for {response}")
     elif "restcountries" in _sut:
         pass
@@ -267,7 +274,7 @@ def parse_proxy_file(sut: str, proxy_file: str, path_patterns: dict[str, list[st
     proxy_df["op_total"] = sum([len(_s) for _s in operations.values()])
     return proxy_df, bug_total, bug_unique
 
-def get_emb_coverage(sut_path: str, exec_file: str) -> tuple[int, float]:
+def get_emb_coverage(sut_path: str, exec_file: str, jdk: str) -> tuple[int, float]:
     def get_source_files_for_jacoco():
         source_files = []
         sub_dirs = [x[0] for x in os.walk(sut_path)]
@@ -277,7 +284,7 @@ def get_emb_coverage(sut_path: str, exec_file: str) -> tuple[int, float]:
                 if target_dir not in source_files:
                     source_files.append(target_dir)
         return source_files
-    
+
     def get_class_files_for_jacoco():
         class_files = []
         sub_dirs = [x[0] for x in os.walk(sut_path)]
@@ -298,7 +305,9 @@ def get_emb_coverage(sut_path: str, exec_file: str) -> tuple[int, float]:
         return 0, 0.0
     cf_command = " ".join([f"--classfiles {x}" for x in class_files])
     to_csv = exec_file.replace(".exec", "_exec.csv")
-    command = f"java -jar {JACOCO_CLI} report {exec_file} {class_files_command} --csv {to_csv}"
+    command = f"java -jar {JACOCO_CLI} report {exec_file} {cf_command} --csv {to_csv}"
+
+    subprocess.run(f". {os.path.join(API_SUTS_FOLD, jdk)} && {command}", shell=True)
 
     # read the csv file
     # TODO: return covered line and line coverage [int, float]
@@ -407,7 +416,7 @@ def get_operation_coverage_and_bug_detection(directory: str, result_dir: str):
         exec_file = find_file(".exec", sut_fold)
         if exec_file is not None:
             sut_path = os.path.join(API_SUTS_FOLD, sut.service_path)
-            covered, coverage = get_emb_coverage(sut_path, exec_file)
+            covered, coverage = get_emb_coverage(sut_path, exec_file, sut.jdk)
             line_coverages['sut'].append(sut.exp_name)
             line_coverages['covered_lines'].append(covered)
             line_coverages['line_coverage'].append(coverage)
