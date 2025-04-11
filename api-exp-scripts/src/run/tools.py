@@ -280,6 +280,14 @@ def run_evomaster(expName, swagger, budget, output, serverUrl, token=None):
 
     time_limit = str(budget) + "s"
 
+    count = 0
+    for index, char in enumerate(serverUrl):
+        if char == '/':
+            count += 1
+        if count == 3:
+            serverUrl = serverUrl[:index]
+            break
+
     run_evo = f". {JDK_8} && java -jar {evo_home} --blackBox true --bbSwaggerUrl file://{swagger} --bbTargetUrl {serverUrl} --outputFormat JAVA_JUNIT_4 --maxTime {time_limit} --outputFolder {output}"
 
     if token is not None:
