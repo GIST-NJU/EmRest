@@ -125,6 +125,20 @@ Similarly, use the following two commands to verify the system environment, and 
 # 1) Check environment readiness for running testing tools
 conda run -n exp python src/run/tools.py check
 
+# Expected output:
+[ OK ] Conda command is available.
+Checking conda environments for tools: RestCT, ARAT-RL, Morest, Schemathesis, EmRest, Miner and exp scripts
+    [ OK ] Conda environment for 'RestCT' exists: 'restct'
+    [ OK ] Conda environment for 'ARAT-RL' exists: 'rl'
+    [ OK ] Conda environment for 'Morest' exists: 'morest'
+    [ OK ] Conda environment for 'MINER' exists: 'miner'
+    [ OK ] Conda environment for 'Schemathesis' exists: 'schemathesis'
+    [ OK ] Conda environment for 'EmRest' exists: 'emrest'
+    [ OK ] Conda environment for experiment scripts exists: 'exp'
+Checking Java 1.8 for tool: EvoMaster
+    [ OK ] Java 1.8 correctly set by /home/ubuntu/EmRest/api-suts/java8.env
+[ OK ] All tools are ready.
+
 # 2) Use a tool named 'arat-rl' to test an API (on port 8080), with one-hour budget
 conda run -n exp python src/run/tools.py run \
   --tool arat-rl \
