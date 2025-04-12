@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15202098.svg)](https://doi.org/10.5281/zenodo.15202098)
+
 # EmRest: Effective REST APIs Testing with Error Message Analysis
 
 EmRest is a black-box testing tool that leverages error message analysis to enhance the generation of both valid and exceptional test inputs for REST APIs.  
