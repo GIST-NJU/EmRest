@@ -1,6 +1,6 @@
 # EmRest Experimental Scripts and Replication Instructions
 
-> **Important**: The experiments can only be replicated on a Linux operating system. We specifically recommend CentOS 7, which we used in our study. Our experimental setup involves running 11 testing tools on 16 APIs with 30 repetitions, resulting in a large number of concurrent processes. We rely on the Linux `screen` command to manage and monitor these processes effectively.
+> **Important**: The experiments can only be replicated on a Linux operating system. We specifically recommend CentOS 7, which we used in our study. Our experimental setup involves running 10 testing tools on 16 APIs with 30 repetitions, resulting in a large number of concurrent processes. We rely on the Linux `screen` command to manage and monitor these processes effectively.
 
 This directory (`api-exp-scripts`) contains all scripts and detailed instructions necessary to replicate the experiments described in our ISSTA 2025 paper, including orchestration of experiments and data analysis.
 
