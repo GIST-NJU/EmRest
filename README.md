@@ -11,6 +11,8 @@ EmRest has been accepted at **ISSTA 2025**. This repository contains its impleme
 
 - `api-exp-scripts/`: Contains scripts to run EmRest and the baseline tools on all API systems, along with scripts for collecting results and generating the figures and tables presented in the paper.  Please refer to [`api-exp-scripts/README.md`](api-exp-scripts/README.md) for instructions on replicating the experiments and reproducing the figures and tables in our paper.
 
-## Experiment Reproduction Notes
+- `EmRest-ISSTA2025.pdf`: The preprint version of our ISSTA 2025 paper.
+
+## Experiment Reproduction
 
 Please refer to [`api-exp-scripts/README.md`](api-exp-scripts/README.md) for instructions on replicating the experiments and reproducing the figures and tables in our paper.

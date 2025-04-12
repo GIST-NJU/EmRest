@@ -23,14 +23,14 @@ This directory (`api-exp-scripts`) contains all scripts and detailed instruction
 
 Before proceeding, ensure the following dependencies are installed on your Linux system (CentOS 7 is recommended, as it was used in our experiments):
 
-- OpenJDK (versions 1.8, 11, and 17)
-- Maven (we used version 3.8.8 in our experiments) 
-- Gradle (we used version 8.5 in our experiments)
+- OpenJDK (versions `1.8`, `11`, and `17`)
+- Maven (we used version `3.8.8` in our experiments) 
+- Gradle (we used version `8.5` in our experiments)
 - Docker and Docker Compose (pull docker images: `mongo:3.6.2`, `mysql:8.3.0`, `witcan/gitlab-ee-api:latest`)
 - Screen (a terminal multiplexer for Linux systems, use `sudo yum install -y screen` to install it on Centos 7)
 - Conda (installation script provided)
 - [mitmproxy](https://mitmproxy.org/#mitmproxy) (a terminal tool for monitoring and intercepting HTTP traffic. We use version `8.1.1-2` in our environment to capture and store network requests that API tools send to the REST APIs.)
-- 
+- [.NET](https://dotnet.microsoft.com/en-us/download/dotnet) (required by tool `MINER`, we used version `6` in our environment. Refer to [api-tools/README.md](../api-tools/README.md#environment-setup) for more details) 
 
 You can use the following script provided to install Conda:
 
@@ -301,8 +301,7 @@ data_dir/
 To reproduce the tables, figures, and analysis results presented in our paper, use the Jupyter notebook `src/analyse/analysis.ipynb` 
 
 In the first cell, set the following variables:
-- `data_dir`: path to the aggregated results directory (i.e., the output from collect.py)
-- `spec_dir`: path to the API specifications, typically api-suts/specifications
+- `data_dir`: path to the aggregated results directory (i.e., the output from `collect.py`)
 
 After configuration, you can run the notebook cell by cell to regenerate all figures and tables reported in the paper.
 The notebook includes the original outputs from our experiments for reference. You can clear and re-run to verify results or modify for further analysis.
