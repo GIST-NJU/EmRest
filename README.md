@@ -1,6 +1,7 @@
 # EmRest: Effective REST APIs Testing with Error Message Analysis
 
-**EmRest** is a black-box testing tool that leverages error message analysis to enhance the generation of both valid and exceptional test inputs for REST APIs.  
+EmRest is a black-box testing tool that leverages error message analysis to enhance the generation of both valid and exceptional test inputs for REST APIs.  
+
 EmRest has been accepted at **ISSTA 2025**. This repository contains its implementation, benchmarks, baselines, and experiment scripts.
 
 - `EmRest_core/`: Contains the source code of EmRest. Please refer to [`EmRest_core/README.md`](EmRest_core/README.md) for installation and usage instructions.
